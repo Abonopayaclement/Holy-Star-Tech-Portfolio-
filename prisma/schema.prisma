@@ -1,0 +1,261 @@
+// Prisma Schema for Holy Star Tech
+// Provider: MySQL (XAMPP Local Development)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// --------------------------------------------------------
+// BETTER AUTH & USER MODELS (ADMINISTRATOR)
+// --------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  role          String    @default("admin")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?   @db.Text
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String   @db.Text
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@map("verification")
+}
+
+// --------------------------------------------------------
+// HOLY STAR TECH DOMAIN MODELS
+// --------------------------------------------------------
+
+enum CategoryType {
+  WEB_APP
+  MOBILE_APP
+  UI_UX
+  ACADEMIC
+  OTHER
+}
+
+model ProjectCategory {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  order     Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  projects  Project[]
+}
+
+model Project {
+  id              String           @id @default(cuid())
+  slug            String           @unique
+  title           String
+  tagline         String           @db.Text
+  description     String           @db.Text
+  fullDescription String           @db.Text
+  categoryType    CategoryType     @default(WEB_APP)
+  categoryId      String?
+  category        ProjectCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  featured        Boolean          @default(false)
+  published       Boolean          @default(true)
+  featuredImage   String?
+  gradient        String           @default("from-amber-500/20 via-indigo-600/20 to-cyan-500/20")
+  techStack       Json // Array of strings
+  features        Json // Array of strings
+  screenshots     Json // Array of objects
+  githubUrl       String?
+  liveUrl         String?
+  apkUrl          String?
+  version         String?
+  androidVersion  String?
+  challenges      Json // Array of strings
+  solutions       Json // Array of strings
+  lessonsLearned  Json // Array of strings
+  order           Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  likes           Like[]
+  comments        Comment[]
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String   @db.Text
+  content     String   @db.Text
+  category    String   @default("Architecture")
+  readTime    String   @default("5 min read")
+  featured    Boolean  @default(false)
+  published   Boolean  @default(true)
+  publishedAt DateTime @default(now())
+  images      Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  likes       Like[]
+  comments    Comment[]
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  fullName  String
+  email     String
+  subject   String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AboutInfo {
+  id         String   @id @default(cuid())
+  authorName String   @default("Abonopaya Clement Ayebono")
+  headline   String   @default("Software Architect & Technical Lead")
+  bio        String   @db.Text
+  philosophy String   @db.Text
+  location   String   @default("Greater Accra, Ghana")
+  email      String   @default("contact@holystar.tech")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Skill {
+  id          String   @id @default(cuid())
+  name        String
+  category    String // e.g. "Frontend", "Backend", "Database", "DevOps"
+  proficiency Int      @default(90) // 1-100
+  iconName    String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ResumeData {
+  id             String   @id @default(cuid())
+  cvFileUrl      String?
+  summary        String   @db.Text
+  experienceJson Json // Array of experience objects
+  educationJson  Json // Array of education objects
+  certsJson      Json // Array of certifications
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model SocialLink {
+  id        String   @id @default(cuid())
+  platform  String   @unique // e.g. "github", "linkedin", "twitter"
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VisitorLog {
+  id         String   @id @default(cuid())
+  visitorId  String
+  path       String
+  device     String?  // Desktop, Mobile, Tablet
+  browser    String?  // Chrome, Safari, Firefox, Edge, etc.
+  os         String?  // Windows, Android, iOS, macOS, Linux
+  referrer   String?
+  ipAddress  String?  // Anonymized/masked IP (e.g. 102.176.xxx.xxx)
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([visitorId])
+}
+
+model Like {
+  id         String   @id @default(cuid())
+  targetType String   // "BLOG" | "PROJECT"
+  blogId     String?
+  projectId  String?
+  visitorId  String?
+  createdAt  DateTime @default(now())
+
+  blog    BlogPost? @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  project Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([blogId])
+  @@index([projectId])
+  @@map("like")
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  targetType String   // "BLOG" | "PROJECT"
+  blogId     String?
+  projectId  String?
+  authorName String
+  content    String   @db.Text
+  published  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  blog    BlogPost? @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  project Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([blogId])
+  @@index([projectId])
+  @@index([published])
+  @@map("comment")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      String   @default("COMMENT") // "COMMENT" | "LIKE" | "CONTACT"
+  targetUrl String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("notification")
+}
