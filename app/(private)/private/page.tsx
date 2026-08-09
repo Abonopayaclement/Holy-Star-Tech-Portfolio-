@@ -116,12 +116,12 @@ export default function PrivateDashboardHome() {
           {/* Visitors Analytics Stat Card */}
           <DashboardCard
             title="Visitors"
-            value={loading ? "..." : metrics.visitors.total ? metrics.visitors.total.toLocaleString() : "1,248"}
+            value={loading ? "..." : (metrics.visitors.total ?? 0).toLocaleString()}
             icon={Users}
             gradient="from-emerald-500/20 via-teal-600/20 to-indigo-600/20"
             details={[
-              { label: "Total Visits", value: metrics.visitors.total ? metrics.visitors.total.toLocaleString() : "1,248" },
-              { label: "Today's Visits", value: metrics.visitors.today || 42, color: "text-emerald-500 font-bold" },
+              { label: "Total Visits", value: (metrics.visitors.total ?? 0).toLocaleString() },
+              { label: "Today's Visits", value: metrics.visitors.today ?? 0, color: "text-emerald-500 font-bold" },
             ]}
           />
 

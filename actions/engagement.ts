@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { projectsData } from "@/constants/projects";
 import { requireAdminSession } from "@/lib/auth-guard";
+import { createNotification } from "@/actions/notifications";
 
 export interface AddCommentInput {
   targetType: "BLOG" | "PROJECT";
@@ -59,6 +60,8 @@ async function ensureEngagementTablesExist() {
         \`authorName\` VARCHAR(191) NOT NULL,
         \`content\` TEXT NOT NULL,
         \`published\` TINYINT(1) NOT NULL DEFAULT 0,
+        \`adminReply\` TEXT NULL,
+        \`adminReplyPublished\` TINYINT(1) NOT NULL DEFAULT 0,
         \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
         PRIMARY KEY (\`id\`),
         INDEX \`comment_blogId_idx\` (\`blogId\`),
@@ -66,6 +69,18 @@ async function ensureEngagementTablesExist() {
         INDEX \`comment_published_idx\` (\`published\`)
       ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
     `);
+
+    try {
+      await prisma.$executeRawUnsafe(`
+        ALTER TABLE \`comment\` ADD COLUMN \`adminReply\` TEXT NULL;
+      `);
+    } catch (_) {}
+
+    try {
+      await prisma.$executeRawUnsafe(`
+        ALTER TABLE \`comment\` ADD COLUMN \`adminReplyPublished\` TINYINT(1) NOT NULL DEFAULT 0;
+      `);
+    } catch (_) {}
 
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS \`notification\` (
@@ -283,6 +298,15 @@ export async function toggleLike({ targetType, slug, visitorId }: ToggleLikeInpu
             visitorId: safeVisitorId,
           },
         });
+        try {
+          const itemTitle = targetItem.title || slug;
+          await createNotification(
+            `❤️ New Like on ${targetType === "BLOG" ? "Article" : "Project"}`,
+            `Someone liked "${itemTitle}"`,
+            "LIKE",
+            "/private/engagement"
+          );
+        } catch (_) {}
       }
     } else {
       // BULLETPROOF RAW SQL FALLBACK FOR LIKE TOGGLE
@@ -304,6 +328,15 @@ export async function toggleLike({ targetType, slug, visitorId }: ToggleLikeInpu
           INSERT INTO \`like\` (id, targetType, blogId, projectId, visitorId, createdAt)
           VALUES (${newId}, ${targetType}, ${blogId}, ${projectId}, ${safeVisitorId}, NOW())
         `;
+        try {
+          const itemTitle = targetItem.title || slug;
+          await createNotification(
+            `❤️ New Like on ${targetType === "BLOG" ? "Article" : "Project"}`,
+            `Someone liked "${itemTitle}"`,
+            "LIKE",
+            "/private/engagement"
+          );
+        } catch (_) {}
       }
     }
 
@@ -539,14 +572,23 @@ export async function getPublicEngagement(targetType: "BLOG" | "PROJECT", slug: 
       totalLikes,
       totalComments,
       publishedCommentsCount,
-      publishedComments: publishedComments.map((c: any) => ({
-        id: c.id,
-        authorName: c.authorName,
-        content: c.content,
-        createdAt: c.createdAt,
-        adminReply: c.adminReply || null,
-        adminReplyPublished: Boolean(c.adminReplyPublished),
-      })),
+      publishedComments: publishedComments.map((c: any) => {
+        const isReplyPublished =
+          c.adminReplyPublished === true ||
+          c.adminReplyPublished === 1 ||
+          String(c.adminReplyPublished) === "1" ||
+          String(c.adminReplyPublished) === "true" ||
+          (Buffer.isBuffer(c.adminReplyPublished) && c.adminReplyPublished[0] === 1);
+
+        return {
+          id: c.id,
+          authorName: c.authorName,
+          content: c.content,
+          createdAt: c.createdAt,
+          adminReply: isReplyPublished && c.adminReply && c.adminReply.trim() ? c.adminReply.trim() : null,
+          adminReplyPublished: isReplyPublished,
+        };
+      }),
       hasLiked,
     };
   } catch (error) {
@@ -577,8 +619,10 @@ export async function toggleCommentPublishStatus(commentId: string, published: b
       `;
     }
 
+    revalidatePath("/", "layout");
     revalidatePath("/blog");
     revalidatePath("/projects");
+    revalidatePath("/whats-new");
     revalidatePath("/private/blog");
     revalidatePath("/private/projects");
     revalidatePath("/private/engagement");
@@ -1062,8 +1106,10 @@ export async function saveAdminReply(input: SaveAdminReplyInput) {
       );
     }
 
+    revalidatePath("/", "layout");
     revalidatePath("/blog");
     revalidatePath("/projects");
+    revalidatePath("/whats-new");
     revalidatePath("/private/engagement");
 
     return {

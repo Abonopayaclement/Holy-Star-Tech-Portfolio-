@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import {
   Activity,
+  Bell,
   BookOpen,
   FileEdit,
   FileText,
@@ -36,10 +37,11 @@ export const adminNavItems: AdminNavItem[] = [
   { title: "Dashboard", href: "/private", icon: LayoutDashboard },
   { title: "Visitors", href: "/private/visitors", icon: Users },
   { title: "Engagement", href: "/private/engagement", icon: HeartHandshake },
+  { title: "Notifications", href: "/private/notifications", icon: Bell },
   { title: "Projects", href: "/private/projects", icon: FolderGit2 },
   { title: "Active Work", href: "/private/active-project", icon: Activity },
   { title: "Blog", href: "/private/blog", icon: BookOpen },
-  { title: "Messages", href: "/private/messages", icon: Mail, badge: "New" },
+  { title: "Messages", href: "/private/messages", icon: Mail },
   { title: "Profile", href: "/private/profile", icon: UserCheck },
   { title: "Settings", href: "/private/settings", icon: Settings },
 ];

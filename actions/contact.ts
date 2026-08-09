@@ -5,6 +5,8 @@ import * as z from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdminSession } from "@/lib/auth-guard";
 
+import { createNotification } from "@/actions/notifications";
+
 const contactMsgSchema = z.object({
   fullName: z.string().min(2, "Full name is required."),
   email: z.string().email("Invalid email address."),
@@ -20,6 +22,15 @@ export async function submitContactMessage(input: ContactMessageInput) {
   const message = await prisma.contactMessage.create({
     data: validated,
   });
+
+  try {
+    await createNotification(
+      `📩 New Contact Message from ${validated.fullName}`,
+      `Subject: "${validated.subject}" - "${validated.message.slice(0, 70)}..."`,
+      "CONTACT",
+      "/private/messages"
+    );
+  } catch (_) {}
 
   revalidatePath("/private/messages");
   revalidatePath("/private");

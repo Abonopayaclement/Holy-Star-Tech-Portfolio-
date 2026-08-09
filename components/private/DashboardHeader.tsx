@@ -155,6 +155,16 @@ export function DashboardHeader({
                 </div>
               )}
             </div>
+
+            <div className="border-t border-border/60 pt-3 text-center">
+              <Link
+                href="/private/notifications"
+                onClick={() => setNotificationsOpen(false)}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-300 hover:underline min-h-[36px]"
+              >
+                <span>View All Notifications →</span>
+              </Link>
+            </div>
           </div>
         )}
 

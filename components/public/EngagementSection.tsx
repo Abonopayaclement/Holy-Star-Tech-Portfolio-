@@ -182,15 +182,15 @@ export function EngagementSection({ targetType, slug, itemTitle }: EngagementSec
                     "{review.content}"
                   </p>
 
-                  {/* VISUALLY DISTINCT ADMIN REPLY */}
-                  {review.adminReply && review.adminReplyPublished && (
-                    <div className="mt-2.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-2.5 space-y-1 text-xs">
-                      <div className="flex items-center gap-1.5 text-indigo-500 font-bold text-[11px]">
-                        <Sparkles className="h-3 w-3" />
+                  {/* VISUALLY DISTINCT ADMIN REPLY UNDERNEATH */}
+                  {review.adminReply && (
+                    <div className="mt-3 rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-3 space-y-1 text-xs">
+                      <div className="flex items-center gap-1.5 text-indigo-400 font-bold text-[11px]">
+                        <Sparkles className="h-3 w-3 text-amber-400" />
                         <span>Admin Reply</span>
                       </div>
-                      <p className="text-foreground leading-relaxed text-[11px]">
-                        {review.adminReply}
+                      <p className="text-foreground leading-relaxed text-xs">
+                        "{review.adminReply}"
                       </p>
                     </div>
                   )}
