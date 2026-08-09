@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { projectsData } from "@/constants/projects";
+import { requireAdminSession } from "@/lib/auth-guard";
 
 export interface AddCommentInput {
   targetType: "BLOG" | "PROJECT";
@@ -497,7 +498,7 @@ export async function getPublicEngagement(targetType: "BLOG" | "PROJECT", slug: 
         publishedCommentsCount = Number(pubCommentsCountRes[0]?.count || 0);
 
         const pubCommentsList: any[] = await prisma.$queryRaw`
-          SELECT id, authorName, content, createdAt FROM \`comment\`
+          SELECT id, authorName, content, adminReply, adminReplyPublished, createdAt FROM \`comment\`
           WHERE targetType = ${targetType}
             AND (${blogId} IS NULL OR blogId = ${blogId})
             AND (${projectId} IS NULL OR projectId = ${projectId})
@@ -543,6 +544,8 @@ export async function getPublicEngagement(targetType: "BLOG" | "PROJECT", slug: 
         authorName: c.authorName,
         content: c.content,
         createdAt: c.createdAt,
+        adminReply: c.adminReply || null,
+        adminReplyPublished: Boolean(c.adminReplyPublished),
       })),
       hasLiked,
     };
@@ -560,6 +563,7 @@ export async function getPublicEngagement(targetType: "BLOG" | "PROJECT", slug: 
 
 export async function toggleCommentPublishStatus(commentId: string, published: boolean) {
   try {
+    await requireAdminSession();
     await ensureEngagementTablesExist();
     const p = prisma as any;
     if (p.comment) {
@@ -589,6 +593,7 @@ export async function toggleCommentPublishStatus(commentId: string, published: b
 
 export async function deleteComment(commentId: string) {
   try {
+    await requireAdminSession();
     await ensureEngagementTablesExist();
     const p = prisma as any;
     if (p.comment) {
@@ -679,6 +684,14 @@ export async function getAdminCommentsForTarget(targetType: "BLOG" | "PROJECT", 
     console.error("Failed to fetch admin comments:", error);
     return { likesCount: 0, comments: [] };
   }
+}
+
+export async function getEngagementStats(targetType: "BLOG" | "PROJECT", slug: string) {
+  const result = await getAdminCommentsForTarget(targetType, slug);
+  return {
+    likesCount: result.likesCount,
+    commentsList: result.comments,
+  };
 }
 
 export async function getDashboardEngagementSummary() {
@@ -891,13 +904,15 @@ export async function getAllEngagementAdmin() {
         authorName: c.authorName,
         content: c.content,
         published: c.published ?? false,
+        adminReply: c.adminReply || null,
+        adminReplyPublished: Boolean(c.adminReplyPublished),
         createdAt: c.createdAt,
         itemTitle: c.targetType === "BLOG" ? c.blog?.title || "Blog Article" : c.project?.title || "Project",
         itemSlug: c.targetType === "BLOG" ? c.blog?.slug || "" : c.project?.slug || "",
       }));
     } else {
       const rawComments: any[] = await prisma.$queryRaw`
-        SELECT c.id, c.targetType, c.authorName, c.content, c.published, c.createdAt,
+        SELECT c.id, c.targetType, c.authorName, c.content, c.published, c.adminReply, c.adminReplyPublished, c.createdAt,
                p.title as projTitle, p.slug as projSlug,
                b.title as blogTitle, b.slug as blogSlug
         FROM \`comment\` c
@@ -912,6 +927,8 @@ export async function getAllEngagementAdmin() {
         authorName: c.authorName,
         content: c.content,
         published: Boolean(c.published),
+        adminReply: c.adminReply || null,
+        adminReplyPublished: Boolean(c.adminReplyPublished),
         createdAt: c.createdAt,
         itemTitle: c.targetType === "BLOG" ? c.blogTitle || "Blog Article" : c.projTitle || "Project",
         itemSlug: c.targetType === "BLOG" ? c.blogSlug || "" : c.projSlug || "",
@@ -982,6 +999,7 @@ export async function getAllEngagementAdmin() {
 
 export async function clearAllLikesAndComments() {
   try {
+    await requireAdminSession();
     await ensureEngagementTablesExist();
     const p = prisma as any;
     if (p.like) await p.like.deleteMany({});
@@ -1004,5 +1022,56 @@ export async function clearAllLikesAndComments() {
   } catch (error) {
     console.error("Failed to clear likes and comments:", error);
     return { success: false, error: String(error) };
+  }
+}
+
+export interface SaveAdminReplyInput {
+  commentId: string;
+  reply: string;
+  publishReply?: boolean;
+}
+
+export async function saveAdminReply(input: SaveAdminReplyInput) {
+  try {
+    await requireAdminSession();
+    await ensureEngagementTablesExist();
+
+    const { commentId, reply, publishReply = true } = input;
+    if (!commentId) {
+      return { success: false, error: "Comment ID is required." };
+    }
+
+    const cleanReply = reply ? sanitizeText(reply.trim()) : "";
+    const isPub = Boolean(publishReply && cleanReply);
+
+    const p = prisma as any;
+    if (p.comment) {
+      await p.comment.update({
+        where: { id: commentId },
+        data: {
+          adminReply: cleanReply || null,
+          adminReplyPublished: isPub,
+        },
+      });
+    } else {
+      await prisma.$executeRawUnsafe(
+        "UPDATE `comment` SET `adminReply` = ?, `adminReplyPublished` = ? WHERE `id` = ?",
+        cleanReply || null,
+        isPub ? 1 : 0,
+        commentId
+      );
+    }
+
+    revalidatePath("/blog");
+    revalidatePath("/projects");
+    revalidatePath("/private/engagement");
+
+    return {
+      success: true,
+      message: isPub ? "Admin reply published!" : "Admin reply draft saved.",
+    };
+  } catch (error) {
+    console.error("Failed to save admin reply:", error);
+    return { success: false, error: "Failed to save admin reply." };
   }
 }

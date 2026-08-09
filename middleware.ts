@@ -8,13 +8,11 @@ export function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", pathname);
 
-  // Redirect legacy /dashboard or /admin requests to /private
-  if (pathname === "/dashboard" || pathname === "/admin") {
-    return NextResponse.redirect(new URL("/private", request.url));
-  }
+  const isPrivateArea =
+    pathname.startsWith("/private") ||
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/admin");
 
-  // Private administration route protection (/private, /private/*)
-  const isPrivateArea = pathname.startsWith("/private");
   const isPrivateLoginPage = pathname === "/private/login";
 
   if (isPrivateArea && !isPrivateLoginPage) {
@@ -29,13 +27,26 @@ export function middleware(request: NextRequest) {
       loginUrl.searchParams.set("from", pathname);
       return NextResponse.redirect(loginUrl);
     }
+
+    if (pathname.startsWith("/dashboard") || pathname.startsWith("/admin")) {
+      return NextResponse.redirect(new URL("/private", request.url));
+    }
   }
 
-  return NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   });
+
+  // Set no-cache header for private routes to prevent browser back button cache bypass
+  if (isPrivateArea) {
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+  }
+
+  return response;
 }
 
 export const config = {

@@ -85,21 +85,21 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* 3. ACADEMIC & QUALIFICATIONS GRID (TEXT/CONTENT ONLY - NO PERSONAL PHOTOS) */}
+        {/* 3. ACADEMIC & QUALIFICATIONS GRID */}
         <section className="space-y-8 border-t border-border/40 pt-16">
           <SectionHeader
             badge="Education"
             title="Academic Background & Training"
-            description="Verified academic qualifications in Computer Science and Computer Hardware."
+            description="Academic qualifications and technical training in Computer Science, Hardware, and Networking."
           />
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-            {/* Kumasi Technical University Card (Text Only) */}
+            {/* Kumasi Technical University Card */}
             <div className="group relative overflow-hidden rounded-3xl border border-border/80 bg-card p-8 shadow-xl transition-all duration-300 hover:border-indigo-500/40 space-y-4">
               <div className="flex items-center justify-between gap-4 border-b border-border/60 pb-4">
                 <div className="inline-flex items-center gap-2.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 text-indigo-500">
                   <GraduationCap className="h-5 w-5" />
-                  <span className="text-xs font-mono font-bold">Kumasi Technical University</span>
+                  <span className="text-xs font-mono font-bold">Kumasi Technical University (KSTU)</span>
                 </div>
                 <span className="text-xs font-mono text-indigo-500 font-semibold rounded-full bg-indigo-500/10 px-3 py-1">
                   Tertiary Studies
@@ -108,125 +108,86 @@ export default function AboutPage() {
               <div className="space-y-2">
                 <h3 className="text-xl font-bold text-foreground">HND Computer Science</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Focusing on software engineering principles, relational database design with MySQL, web applications, object-oriented programming in Java and Python, and mobile app development in Android Studio.
+                  Advanced studies focusing on software engineering principles, database systems with MySQL, web applications, object-oriented programming in Java and Python, and mobile app development in Android Studio.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2 pt-2">
-                <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
-                  Software Engineering
+              <div className="space-y-1.5 pt-2">
+                <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-indigo-500">
+                  Key Courses & Subjects Studied:
                 </span>
-                <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
-                  MySQL & Databases
-                </span>
-                <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
-                  Android Studio
-                </span>
-                <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
-                  Java & Python
-                </span>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
+                    Software Engineering
+                  </span>
+                  <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
+                    Database Development & MySQL
+                  </span>
+                  <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
+                    Mobile App Development (Android Studio)
+                  </span>
+                  <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
+                    Java & Python Programming
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Bolgatanga Technical Institute Card (Text Only) */}
+            {/* Bolgatanga Technical Institute Card */}
             <div className="group relative overflow-hidden rounded-3xl border border-border/80 bg-card p-8 shadow-xl transition-all duration-300 hover:border-amber-500/40 space-y-4">
               <div className="flex items-center justify-between gap-4 border-b border-border/60 pb-4">
                 <div className="inline-flex items-center gap-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 px-4 py-2 text-amber-500">
                   <Wrench className="h-5 w-5" />
-                  <span className="text-xs font-mono font-bold">Bolgatanga Technical Institute</span>
+                  <span className="text-xs font-mono font-bold">Bolgatanga Technical Institute (Boga Technical)</span>
                 </div>
                 <span className="text-xs font-mono text-amber-500 font-semibold rounded-full bg-amber-500/10 px-3 py-1">
                   Technical Foundation
                 </span>
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold text-foreground">Computer Hardware Engineering</h3>
+                <h3 className="text-xl font-bold text-foreground">Computer Hardware & Networking</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Hands-on practical hardware diagnostic training, motherboard component inspection, operating system installation, memory configuration, and system maintenance.
+                  Hands-on practical training in electronics, hardware diagnostics, motherboard inspection, computer networking configuration, operating system installation, and system maintenance.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2 pt-2">
-                <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
-                  Hardware Diagnostics
+              <div className="space-y-1.5 pt-2">
+                <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-amber-500">
+                  Key Courses & Subjects Studied:
                 </span>
-                <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
-                  System Architecture
-                </span>
-                <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
-                  OS Maintenance
-                </span>
-                <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
-                  Motherboard Assembly
-                </span>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
+                    Electronics and Computer Hardware
+                  </span>
+                  <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
+                    Computer Networking
+                  </span>
+                  <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
+                    Practical Computer Networking Skills
+                  </span>
+                  <span className="rounded-lg border border-border/60 bg-accent/40 px-2.5 py-1 font-mono text-[11px] text-muted-foreground">
+                    Hardware Diagnostics & Maintenance
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 4 & 5. TECHNICAL FOCUS & LEADERSHIP (TEXT/CONTENT ONLY - NO PERSONAL PHOTOS) */}
+        {/* 4. TECHNICAL SKILLS SECTION */}
         <section className="space-y-8 border-t border-border/40 pt-16">
           <SectionHeader
-            badge="Engineering Philosophy"
-            title="Technical Focus & Leadership"
-            description="Combining software architecture with practical campus engineering solutions."
+            badge="Skills"
+            title="Technical Skills"
+            description="Software development, programming languages, computer networking, and hardware capabilities."
           />
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-            {/* Technical Systems & Architecture (Text Only) */}
-            <div className="group relative overflow-hidden rounded-3xl border border-border/80 bg-card p-8 shadow-xl transition-all duration-300 hover:border-cyan-500/40 space-y-4">
-              <div className="flex items-center justify-between gap-4 border-b border-border/60 pb-4">
-                <div className="inline-flex items-center gap-2.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 px-4 py-2 text-cyan-500">
-                  <Terminal className="h-5 w-5" />
-                  <span className="text-xs font-mono font-bold">Software Architecture</span>
-                </div>
-                <span className="text-xs font-mono text-cyan-500 font-semibold rounded-full bg-cyan-500/10 px-3 py-1">
-                  Technical Focus
-                </span>
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold text-foreground">Clean Architecture & Continuous Learning</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Emphasizing structured code layout, clear state management, comprehensive technical documentation, and performance optimization across web platforms and API integrations.
-                </p>
-              </div>
-            </div>
-
-            {/* Campus Engineering & COMPSSA Leadership (Text Only) */}
-            <div className="group relative overflow-hidden rounded-3xl border border-border/80 bg-card p-8 shadow-xl transition-all duration-300 hover:border-emerald-500/40 space-y-4">
-              <div className="flex items-center justify-between gap-4 border-b border-border/60 pb-4">
-                <div className="inline-flex items-center gap-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 text-emerald-500">
-                  <Users className="h-5 w-5" />
-                  <span className="text-xs font-mono font-bold">KtU COMPSSA Community</span>
-                </div>
-                <span className="text-xs font-mono text-emerald-500 font-semibold rounded-full bg-emerald-500/10 px-3 py-1">
-                  Leadership
-                </span>
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold text-foreground">Campus Software Solutions</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Active involvement in departmental project building, student association management portals, and practical software engineering collaborations at Kumasi Technical University.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 6. TECHNICAL PROFICIENCIES GRID */}
-        <section className="space-y-8 border-t border-border/40 pt-16">
-          <SectionHeader
-            badge="Technology Stack"
-            title="Technical Skills Breakdown"
-            description="Software, programming languages, and hardware capabilities."
-          />
-
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-md space-y-3">
               <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-500">
                 <Laptop className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-bold text-foreground">Frontend Web Development</h3>
+              <h3 className="text-base font-bold text-foreground">Web Development</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                HTML5, CSS3, JavaScript, React, Next.js.
+                HTML5, CSS3, JavaScript, React, Next.js, responsive web interfaces.
               </p>
             </div>
 
@@ -234,9 +195,9 @@ export default function AboutPage() {
               <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
                 <Terminal className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-bold text-foreground">Backend & Database</h3>
+              <h3 className="text-base font-bold text-foreground">Backend & Database Development</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Node.js, Express.js, and MySQL for structured relational backend data persistence.
+                Node.js, Express.js APIs, and MySQL for relational backend database development.
               </p>
             </div>
 
@@ -244,9 +205,9 @@ export default function AboutPage() {
               <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-500">
                 <Smartphone className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-bold text-foreground">Mobile Development</h3>
+              <h3 className="text-base font-bold text-foreground">Mobile Application Development</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Android Studio for developing native mobile utilities and apps.
+                Android Studio for developing native Android mobile applications.
               </p>
             </div>
 
@@ -254,9 +215,19 @@ export default function AboutPage() {
               <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
                 <Wrench className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-bold text-foreground">Computer & Hardware Skills</h3>
+              <h3 className="text-base font-bold text-foreground">Computer Hardware</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Hardware troubleshooting, software installation, OS installation, and basic maintenance.
+                Electronics and computer hardware diagnostics, system maintenance, OS installation, and hardware troubleshooting.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-md space-y-3">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+                <Terminal className="h-5 w-5" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">Computer Networking</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Computer networking principles and practical computer networking skills.
               </p>
             </div>
 
@@ -266,17 +237,17 @@ export default function AboutPage() {
               </div>
               <h3 className="text-base font-bold text-foreground">Programming Languages</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Python, Java, and JavaScript for software engineering logic.
+                Python, Java, and JavaScript.
               </p>
             </div>
 
-            <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-md space-y-3">
+            <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-md space-y-3 lg:col-span-2">
               <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-500">
                 <CheckCircle2 className="h-5 w-5" />
               </div>
               <h3 className="text-base font-bold text-foreground">Development Tools</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Visual Studio Code, Git, GitHub, and XAMPP.
+                Visual Studio Code, Git, GitHub, XAMPP, and Android Studio SDK.
               </p>
             </div>
           </div>

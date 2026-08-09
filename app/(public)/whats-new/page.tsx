@@ -4,6 +4,8 @@ import { SectionHeader } from "@/components/shared/SectionHeader";
 import { siteConfig } from "@/config/site";
 import { getActiveWork } from "@/actions/active-work";
 
+import { EngagementSection } from "@/components/public/EngagementSection";
+
 export const metadata = {
   title: `What's New | ${siteConfig.name}`,
   description: `Current projects, active learning, recent updates, and ongoing software development activities by ${siteConfig.author}.`,
@@ -61,6 +63,13 @@ export default async function WhatsNewPage() {
                 />
               </div>
             </div>
+
+            {/* REAL-TIME ENGAGEMENT FOR ACTIVE WORK */}
+            <EngagementSection
+              targetType="PROJECT"
+              slug="active-work-item"
+              itemTitle={activeWork.title}
+            />
           </section>
         ) : null}
 

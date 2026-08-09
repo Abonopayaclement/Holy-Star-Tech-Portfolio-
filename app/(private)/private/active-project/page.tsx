@@ -14,10 +14,14 @@ import {
 } from "lucide-react";
 import { AdminLayout } from "@/components/private/AdminLayout";
 import { getActiveWork, updateActiveWork } from "@/actions/active-work";
+import { getAdminCommentsForTarget, deleteComment } from "@/actions/engagement";
+import { Heart, MessageSquare, Trash2 } from "lucide-react";
 
 export default function PrivateActiveProjectPage() {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -25,7 +29,18 @@ export default function PrivateActiveProjectPage() {
   const [status, setStatus] = useState<"Planning" | "In Progress" | "Testing" | "Completed">("In Progress");
   const [image, setImage] = useState("");
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [likesCount, setLikesCount] = useState(0);
+  const [commentsList, setCommentsList] = useState<any[]>([]);
+
+  const loadEngagement = async () => {
+    try {
+      const stats = await getAdminCommentsForTarget("PROJECT", "active-work-item");
+      setLikesCount(stats.likesCount);
+      setCommentsList(stats.comments);
+    } catch (err) {
+      console.error("Failed to load active work engagement stats:", err);
+    }
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -39,6 +54,7 @@ export default function PrivateActiveProjectPage() {
           setStatus((data.status as any) || "In Progress");
           setImage(data.image || "");
         }
+        await loadEngagement();
       } catch (err) {
         toast.error("Failed to load active project status.");
       } finally {
@@ -47,6 +63,14 @@ export default function PrivateActiveProjectPage() {
     }
     loadData();
   }, []);
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (confirm("Are you sure you want to delete this comment?")) {
+      await deleteComment(commentId);
+      toast.success("Comment deleted.");
+      loadEngagement();
+    }
+  };
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -277,6 +301,57 @@ export default function PrivateActiveProjectPage() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* REAL-TIME ENGAGEMENT STATS FOR ACTIVE WORK */}
+            <div className="space-y-4 pt-4 border-t border-border/60">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-indigo-500" />
+                  <span>Active Work Engagement & Feedback</span>
+                </h3>
+                <div className="flex items-center gap-3 text-xs font-mono font-bold">
+                  <span className="inline-flex items-center gap-1 text-rose-500">
+                    <Heart className="h-3.5 w-3.5 fill-rose-500" /> {likesCount} Likes
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-indigo-500">
+                    <MessageSquare className="h-3.5 w-3.5" /> {commentsList.length} Comments
+                  </span>
+                </div>
+              </div>
+
+              {commentsList.length === 0 ? (
+                <p className="text-xs text-muted-foreground py-4 text-center">
+                  No visitor comments submitted for Active Work yet.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {commentsList.map((c) => (
+                    <div
+                      key={c.id}
+                      className="flex items-start justify-between gap-3 rounded-2xl border border-border/60 bg-accent/20 p-4 text-xs"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-foreground">{c.authorName}</span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(c.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-muted-foreground">{c.content}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteComment(c.id)}
+                        className="rounded-lg p-1.5 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
+                        title="Delete Comment"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

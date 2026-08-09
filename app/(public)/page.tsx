@@ -13,6 +13,7 @@ import { siteConfig } from "@/config/site";
 import { getProjects } from "@/actions/projects";
 import { getBlogPosts } from "@/actions/blog";
 import { getSkillsData, getProfileData, getResumeData } from "@/actions/profile";
+import { CardEngagement } from "@/components/public/CardEngagement";
 
 export default async function HomePage() {
   const [projects, posts, skills, profile, resume] = await Promise.all([
@@ -24,7 +25,7 @@ export default async function HomePage() {
   ]);
 
   // Featured projects on homepage: Hotel Management System, COMPSSA Management System & Smart Data Usage
-  const featuredProjects = projects.filter((p) => p.featured).slice(0, 3);
+  const featuredProjects = projects.filter((p: any) => p.featured).slice(0, 3);
   const displayProjects = featuredProjects.length > 0 ? featuredProjects : projects.slice(0, 3);
   const latestArticles = posts.slice(0, 3);
 
@@ -114,24 +115,32 @@ export default async function HomePage() {
                   </div>
 
                   {/* Actions Footer */}
-                  <div className="flex items-center justify-between gap-3 pt-6 border-t border-border/60 mt-6">
-                    <Link
-                      href={`/projects/${project.slug}`}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-500 hover:underline"
-                    >
-                      <span>View Case Study</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
-
-                    {project.categoryType === "MOBILE_APP" && project.apkUrl && (
-                      <a
-                        href={project.apkUrl}
-                        download
-                        className="inline-flex items-center gap-1 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-[11px] font-semibold text-indigo-500 hover:bg-indigo-500/20 transition-all"
+                  <div className="flex flex-col gap-3 pt-4 border-t border-border/60 mt-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <CardEngagement
+                        targetType="PROJECT"
+                        slug={project.slug}
+                        itemTitle={project.title}
+                      />
+                      {project.categoryType === "MOBILE_APP" && project.apkUrl && (
+                        <a
+                          href={project.apkUrl}
+                          download
+                          className="inline-flex items-center gap-1 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-2.5 py-1 text-[11px] font-semibold text-indigo-500 hover:bg-indigo-500/20 transition-all"
+                        >
+                          <Download className="h-3.5 w-3.5" /> APK
+                        </a>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-end pt-1">
+                      <Link
+                        href={`/projects/${project.slug}`}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-500 hover:underline"
                       >
-                        <Download className="h-3.5 w-3.5" /> APK
-                      </a>
-                    )}
+                        <span>View Case Study</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               );
@@ -209,17 +218,26 @@ export default async function HomePage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between gap-2 pt-6 border-t border-border/60 mt-6">
-                    <span className="text-[11px] font-mono text-muted-foreground">
-                      {formattedDate}
-                    </span>
-                    <Link
-                      href={`/blog/${post.slug}`}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-500 hover:underline"
-                    >
-                      <span>Continue Reading</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Link>
+                  <div className="flex flex-col gap-3 pt-4 border-t border-border/60 mt-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <CardEngagement
+                        targetType="BLOG"
+                        slug={post.slug}
+                        itemTitle={post.title}
+                      />
+                      <span className="text-[11px] font-mono text-muted-foreground">
+                        {formattedDate}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-end pt-1">
+                      <Link
+                        href={`/blog/${post.slug}`}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-500 hover:underline"
+                      >
+                        <span>Continue Reading</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               );

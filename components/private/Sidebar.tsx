@@ -55,7 +55,7 @@ export function Sidebar() {
     }
     await signOutAdmin();
     toast.success("Administrator signed out successfully.");
-    window.location.href = "/private/login";
+    window.location.href = "/";
   };
 
   return (

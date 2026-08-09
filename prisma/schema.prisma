@@ -230,14 +230,16 @@ model Like {
 }
 
 model Comment {
-  id         String   @id @default(cuid())
-  targetType String   // "BLOG" | "PROJECT"
-  blogId     String?
-  projectId  String?
-  authorName String
-  content    String   @db.Text
-  published  Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id                  String   @id @default(cuid())
+  targetType          String   // "BLOG" | "PROJECT"
+  blogId              String?
+  projectId           String?
+  authorName          String
+  content             String   @db.Text
+  published           Boolean  @default(false)
+  adminReply          String?  @db.Text
+  adminReplyPublished Boolean  @default(false)
+  createdAt           DateTime @default(now())
 
   blog    BlogPost? @relation(fields: [blogId], references: [id], onDelete: Cascade)
   project Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)

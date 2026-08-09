@@ -34,8 +34,10 @@ export type ProjectInput = z.infer<typeof projectSchema>;
 
 async function seedDefaultProjectsIfEmpty() {
   try {
-    const count = await prisma.project.count();
-    if (count === 0) {
+    const validSlugs = projectsData.map((p) => p.slug);
+    const dbProjects = await prisma.project.findMany();
+
+    if (dbProjects.length === 0) {
       for (const p of projectsData) {
         let validCategoryType: any = "WEB_APP";
         if (["WEB_APP", "MOBILE_APP", "UI_UX", "ACADEMIC", "OTHER"].includes(p.categoryType)) {
@@ -65,6 +67,24 @@ async function seedDefaultProjectsIfEmpty() {
           } as any,
         });
       }
+    } else {
+      // Remove any duplicate records with non-canonical slugs if count > 10
+      const seenSlugs = new Set<string>();
+      const idsToDelete: string[] = [];
+
+      for (const p of dbProjects) {
+        if (!validSlugs.includes(p.slug) || seenSlugs.has(p.slug)) {
+          idsToDelete.push(p.id);
+        } else {
+          seenSlugs.add(p.slug);
+        }
+      }
+
+      if (idsToDelete.length > 0) {
+        await prisma.project.deleteMany({
+          where: { id: { in: idsToDelete } },
+        });
+      }
     }
   } catch (err) {
     console.warn("Seed default projects error:", err);
@@ -76,7 +96,7 @@ export async function getProjects() {
     await seedDefaultProjectsIfEmpty();
     const list = await prisma.project.findMany({
       where: { published: true } as any,
-      orderBy: { order: "asc" },
+      orderBy: { createdAt: "asc" },
     });
     if (list.length > 0) return list;
     return projectsData as any;

@@ -2,6 +2,9 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getAdminSession } from "@/lib/auth-guard";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function PrivateLayout({
   children,
 }: {

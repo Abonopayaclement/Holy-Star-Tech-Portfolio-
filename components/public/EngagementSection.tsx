@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Heart, MessageSquare, ShieldCheck, Sparkles, Star } from "lucide-react";
+import { Heart, MessageSquare, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { getPublicEngagement, toggleLike } from "@/actions/engagement";
-import { QuickCommentModal } from "@/components/public/QuickCommentModal";
+import { SimpleAddCommentModal } from "@/components/public/SimpleAddCommentModal";
 
 interface EngagementSectionProps {
   targetType: "BLOG" | "PROJECT";
@@ -30,7 +30,14 @@ export function EngagementSection({ targetType, slug, itemTitle }: EngagementSec
   const [likesCount, setLikesCount] = useState(0);
   const [totalComments, setTotalComments] = useState(0);
   const [publishedComments, setPublishedComments] = useState<
-    { id: string; authorName: string; content: string; createdAt: string }[]
+    {
+      id: string;
+      authorName: string;
+      content: string;
+      createdAt: string;
+      adminReply?: string | null;
+      adminReplyPublished?: boolean;
+    }[]
   >([]);
 
   const [hasLiked, setHasLiked] = useState(false);
@@ -44,7 +51,7 @@ export function EngagementSection({ targetType, slug, itemTitle }: EngagementSec
       const stats = await getPublicEngagement(targetType, slug, vid);
       setLikesCount(stats.totalLikes);
       setTotalComments(stats.totalComments);
-      setPublishedComments(stats.publishedComments);
+      setPublishedComments(stats.publishedComments || []);
       setHasLiked(stats.hasLiked);
     } catch (err) {
       console.error("Failed to load public engagement:", err);
@@ -92,7 +99,7 @@ export function EngagementSection({ targetType, slug, itemTitle }: EngagementSec
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 rounded-3xl border border-border/80 bg-card p-6 sm:p-8 shadow-md">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-emerald-500">
-            <Sparkles className="h-4 w-4" /> Portfolio Feedback & Review
+            <Sparkles className="h-4 w-4" /> Community Reactions
           </div>
           <h3 className="text-xl font-bold text-foreground">{itemTitle}</h3>
           <div className="flex items-center gap-4 text-xs font-mono font-bold pt-1">
@@ -135,25 +142,24 @@ export function EngagementSection({ targetType, slug, itemTitle }: EngagementSec
             className="inline-flex items-center gap-2 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 px-5 py-3 text-xs font-semibold text-indigo-500 hover:bg-indigo-500/20 transition-all active:scale-95 shadow-sm min-h-[44px]"
           >
             <MessageSquare className="h-4 w-4" />
-            <span>Add Comment</span>
+            <span>Comment</span>
           </button>
         </div>
       </div>
 
-      {/* 2. CUSTOMER REVIEWS / APPROVED COMMENTS GRID (MAX 5 CARDS PER ROW ON DESKTOP, MAX 15 SHOWN) */}
+      {/* 2. PUBLISHED COMMENTS LIST */}
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/60 pb-3">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-emerald-500" />
-            <h4 className="text-lg font-bold text-foreground">Customer Reviews & Visitor Feedback</h4>
+            <MessageSquare className="h-5 w-5 text-indigo-500" />
+            <h4 className="text-lg font-bold text-foreground">Comments</h4>
           </div>
           <span className="text-xs font-mono text-muted-foreground">
-            Displaying {publishedComments.length} published review{publishedComments.length !== 1 ? "s" : ""} (Max 15)
+            Displaying {publishedComments.length} published comment{publishedComments.length !== 1 ? "s" : ""} (Max 15)
           </span>
         </div>
 
         {publishedComments.length > 0 ? (
-          /* RESPONSIVE GRID: MAX 5 CARDS PER ROW ON LARGE DESKTOP (lg:grid-cols-5) */
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             {publishedComments.map((review) => (
               <div
@@ -172,13 +178,26 @@ export function EngagementSection({ targetType, slug, itemTitle }: EngagementSec
                     <Heart className="h-3.5 w-3.5 text-emerald-500 fill-emerald-500/20 shrink-0" />
                   </div>
 
-                  <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line line-clamp-6 font-sans">
+                  <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line font-sans">
                     "{review.content}"
                   </p>
+
+                  {/* VISUALLY DISTINCT ADMIN REPLY */}
+                  {review.adminReply && review.adminReplyPublished && (
+                    <div className="mt-2.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-2.5 space-y-1 text-xs">
+                      <div className="flex items-center gap-1.5 text-indigo-500 font-bold text-[11px]">
+                        <Sparkles className="h-3 w-3" />
+                        <span>Admin Reply</span>
+                      </div>
+                      <p className="text-foreground leading-relaxed text-[11px]">
+                        {review.adminReply}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-2 border-t border-border/40 text-[10px] font-mono text-muted-foreground flex items-center justify-between">
-                  <span>Verified Review</span>
+                  <span>Verified Comment</span>
                   <span>{formatTimeAgo(review.createdAt)}</span>
                 </div>
               </div>
@@ -187,14 +206,14 @@ export function EngagementSection({ targetType, slug, itemTitle }: EngagementSec
         ) : (
           <div className="rounded-3xl border border-dashed border-border/60 bg-card/40 p-8 text-center text-xs text-muted-foreground space-y-2">
             <MessageSquare className="mx-auto h-8 w-8 text-indigo-500/60" />
-            <p className="font-semibold text-foreground">No published reviews yet.</p>
-            <p>Be the first to leave a comment or feedback! Your comment will appear after admin review.</p>
+            <p className="font-semibold text-foreground">No published comments yet.</p>
+            <p>Be the first to leave a comment! Your comment will appear after admin review.</p>
           </div>
         )}
       </div>
 
-      {/* QUICK COMMENT MODAL */}
-      <QuickCommentModal
+      {/* SIMPLE ADD COMMENT MODAL FOR DETAIL PAGES */}
+      <SimpleAddCommentModal
         isOpen={commentModalOpen}
         onClose={() => setCommentModalOpen(false)}
         targetType={targetType}

@@ -98,7 +98,7 @@ export function BlogEditorModal({
   };
 
   React.useEffect(() => {
-    if (initialData) {
+    if (isOpen && initialData) {
       setTitle(initialData.title);
       setSlug(initialData.slug);
       setExcerpt(initialData.excerpt);
@@ -107,6 +107,7 @@ export function BlogEditorModal({
       setReadTime(initialData.readTime || "5 min read");
       setFeatured(initialData.featured || false);
       setImages(initialData.images || []);
+      loadEngagement();
     } else {
       setTitle("");
       setSlug("");
@@ -116,6 +117,8 @@ export function BlogEditorModal({
       setReadTime("5 min read");
       setFeatured(false);
       setImages([]);
+      setCommentsList([]);
+      setLikesCount(0);
     }
   }, [initialData, isOpen]);
 
@@ -423,6 +426,19 @@ export function BlogEditorModal({
                 >
                   <Eye className="h-3.5 w-3.5" /> Preview
                 </button>
+                {initialData && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("comments")}
+                    className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                      activeTab === "comments"
+                        ? "bg-card text-foreground shadow-xs"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <MessageSquare className="h-3.5 w-3.5 text-indigo-500" /> Comments ({commentsList.length})
+                  </button>
+                )}
               </div>
 
               {/* UPLOAD FILE DIRECTLY FROM PHONE OR DESKTOP */}
@@ -562,6 +578,57 @@ export function BlogEditorModal({
                 <div className="prose dark:prose-invert max-w-none text-xs leading-relaxed text-foreground whitespace-pre-wrap">
                   {content || "No article content written yet..."}
                 </div>
+              </div>
+            ) : (
+              /* COMMENTS TAB */
+              <div className="min-h-[300px] w-full rounded-2xl border border-border/80 bg-background p-6 space-y-4 overflow-y-auto">
+                <div className="flex items-center justify-between border-b border-border/60 pb-3">
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-indigo-500" />
+                    <span>User Comments ({commentsList.length})</span>
+                  </h3>
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500" /> {likesCount} Likes
+                  </span>
+                </div>
+
+                {commentsList.length === 0 ? (
+                  <p className="text-xs text-muted-foreground py-8 text-center">
+                    No comments submitted for this blog article yet.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {commentsList.map((c) => (
+                      <div
+                        key={c.id}
+                        className="flex items-start justify-between gap-3 rounded-xl border border-border/60 bg-accent/20 p-3.5 text-xs"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-foreground">{c.authorName}</span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {new Date(c.createdAt).toLocaleDateString()}
+                            </span>
+                            {!c.published && (
+                              <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-500">
+                                Pending Approval
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-muted-foreground">{c.content}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteComment(c.id)}
+                          className="rounded-lg p-1.5 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
+                          title="Delete Comment"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
