@@ -301,7 +301,7 @@ export async function toggleLike({ targetType, slug, visitorId }: ToggleLikeInpu
         try {
           const itemTitle = targetItem.title || slug;
           await createNotification(
-            `❤️ New Like on ${targetType === "BLOG" ? "Article" : "Project"}`,
+            `❤️ New Like on ${targetType === "BLOG" ? "Post" : "Project"}`,
             `Someone liked "${itemTitle}"`,
             "LIKE",
             "/private/engagement"
@@ -331,7 +331,7 @@ export async function toggleLike({ targetType, slug, visitorId }: ToggleLikeInpu
         try {
           const itemTitle = targetItem.title || slug;
           await createNotification(
-            `❤️ New Like on ${targetType === "BLOG" ? "Article" : "Project"}`,
+            `❤️ New Like on ${targetType === "BLOG" ? "Post" : "Project"}`,
             `Someone liked "${itemTitle}"`,
             "LIKE",
             "/private/engagement"
@@ -951,7 +951,7 @@ export async function getAllEngagementAdmin() {
         adminReply: c.adminReply || null,
         adminReplyPublished: Boolean(c.adminReplyPublished),
         createdAt: c.createdAt,
-        itemTitle: c.targetType === "BLOG" ? c.blog?.title || "Blog Article" : c.project?.title || "Project",
+        itemTitle: c.targetType === "BLOG" ? c.blog?.title || "Blog Post" : c.project?.title || "Project",
         itemSlug: c.targetType === "BLOG" ? c.blog?.slug || "" : c.project?.slug || "",
       }));
     } else {
@@ -974,7 +974,7 @@ export async function getAllEngagementAdmin() {
         adminReply: c.adminReply || null,
         adminReplyPublished: Boolean(c.adminReplyPublished),
         createdAt: c.createdAt,
-        itemTitle: c.targetType === "BLOG" ? c.blogTitle || "Blog Article" : c.projTitle || "Project",
+        itemTitle: c.targetType === "BLOG" ? c.blogTitle || "Blog Post" : c.projTitle || "Project",
         itemSlug: c.targetType === "BLOG" ? c.blogSlug || "" : c.projSlug || "",
       }));
     }

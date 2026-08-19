@@ -32,6 +32,9 @@ interface ProjectFormProps {
     tagline: string;
     description: string;
     fullDescription: string;
+    systemArchitecture?: string | null;
+    status?: string | null;
+    classification?: string | null;
     categoryType: "WEB_APP" | "MOBILE_APP" | "UI_UX" | "ACADEMIC" | "OTHER";
     featured: boolean;
     published: boolean;
@@ -48,6 +51,7 @@ interface ProjectFormProps {
     challenges: string[];
     solutions: string[];
     lessonsLearned: string[];
+    futureImprovements?: string[];
   } | null;
 }
 
@@ -63,6 +67,15 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
   const [description, setDescription] = useState(initialData?.description || "");
   const [fullDescription, setFullDescription] = useState(
     initialData?.fullDescription || ""
+  );
+  const [systemArchitecture, setSystemArchitecture] = useState(
+    (initialData as any)?.systemArchitecture || ""
+  );
+  const [classification, setClassification] = useState(
+    (initialData as any)?.classification || "Personal Project"
+  );
+  const [status, setStatus] = useState(
+    (initialData as any)?.status || "Completed"
   );
   const [categoryType, setCategoryType] = useState<
     "WEB_APP" | "MOBILE_APP" | "UI_UX" | "ACADEMIC" | "OTHER"
@@ -108,6 +121,16 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
     initialData?.solutions || []
   );
   const [solutionInput, setSolutionInput] = useState("");
+
+  const [lessonsLearned, setLessonsLearned] = useState<string[]>(
+    initialData?.lessonsLearned || []
+  );
+  const [lessonInput, setLessonInput] = useState("");
+
+  const [futureImprovements, setFutureImprovements] = useState<string[]>(
+    (initialData as any)?.futureImprovements || []
+  );
+  const [futureInput, setFutureInput] = useState("");
 
   const featuredImageInputRef = useRef<HTMLInputElement>(null);
   const screenshotInputRef = useRef<HTMLInputElement>(null);
@@ -224,17 +247,44 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
     setFeatures(features.filter((_, i) => i !== index));
   };
 
-  // Challenge / Solution Handlers
+  const removeChallenge = (index: number) => {
+    setChallenges(challenges.filter((_, i) => i !== index));
+  };
+
   const addChallenge = () => {
     if (!challengeInput.trim()) return;
     setChallenges([...challenges, challengeInput.trim()]);
     setChallengeInput("");
   };
 
+  const removeSolution = (index: number) => {
+    setSolutions(solutions.filter((_, i) => i !== index));
+  };
+
   const addSolution = () => {
     if (!solutionInput.trim()) return;
     setSolutions([...solutions, solutionInput.trim()]);
     setSolutionInput("");
+  };
+
+  const removeLesson = (index: number) => {
+    setLessonsLearned(lessonsLearned.filter((_, i) => i !== index));
+  };
+
+  const addLesson = () => {
+    if (!lessonInput.trim()) return;
+    setLessonsLearned([...lessonsLearned, lessonInput.trim()]);
+    setLessonInput("");
+  };
+
+  const removeFuture = (index: number) => {
+    setFutureImprovements(futureImprovements.filter((_, i) => i !== index));
+  };
+
+  const addFuture = () => {
+    if (!futureInput.trim()) return;
+    setFutureImprovements([...futureImprovements, futureInput.trim()]);
+    setFutureInput("");
   };
 
   const handleSubmit = async (publishNow: boolean) => {
@@ -250,6 +300,9 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       tagline: tagline || title,
       description,
       fullDescription: fullDescription || description,
+      systemArchitecture: systemArchitecture || null,
+      classification: classification || null,
+      status: status || "Completed",
       categoryType,
       featured,
       published: publishNow,
@@ -265,7 +318,8 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       androidVersion: androidVersion || null,
       challenges,
       solutions,
-      lessonsLearned: [],
+      lessonsLearned,
+      futureImprovements,
     };
 
     try {
@@ -381,7 +435,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Category *
@@ -401,16 +455,44 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
 
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Tagline / Short Subtitle
+                Project Classification
               </label>
               <input
                 type="text"
-                value={tagline}
-                onChange={(e) => setTagline(e.target.value)}
-                placeholder="e.g. High-throughput distributed web framework"
+                value={classification}
+                onChange={(e) => setClassification(e.target.value)}
+                placeholder="e.g. Academic Project, Commercial Product, Personal Project"
                 className="w-full rounded-xl border border-border/80 bg-background/90 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:outline-hidden transition-colors"
               />
             </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Project Status
+              </label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full rounded-xl border border-border/80 bg-background/90 px-4 py-2.5 text-sm text-foreground focus:border-indigo-500 focus:outline-hidden transition-colors"
+              >
+                <option value="Completed">Completed</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Archived">Archived</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Tagline / Short Subtitle
+            </label>
+            <input
+              type="text"
+              value={tagline}
+              onChange={(e) => setTagline(e.target.value)}
+              placeholder="e.g. High-throughput distributed web framework"
+              className="w-full rounded-xl border border-border/80 bg-background/90 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:outline-hidden transition-colors"
+            />
           </div>
 
           <div className="space-y-1.5">
@@ -428,13 +510,26 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Full Overview & Description *
+              Executive Summary & Full Overview *
             </label>
             <textarea
-              rows={5}
+              rows={4}
               value={fullDescription}
               onChange={(e) => setFullDescription(e.target.value)}
-              placeholder="Comprehensive architectural overview, scope, and technical features..."
+              placeholder="Comprehensive executive summary, scope, and problem statement..."
+              className="w-full rounded-xl border border-border/80 bg-background/90 p-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:outline-hidden resize-y transition-colors"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              System Architecture & Engineering Information
+            </label>
+            <textarea
+              rows={4}
+              value={systemArchitecture}
+              onChange={(e) => setSystemArchitecture(e.target.value)}
+              placeholder="Detailed system architecture, design patterns, modular state management, and engineering approach..."
               className="w-full rounded-xl border border-border/80 bg-background/90 p-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:outline-hidden resize-y transition-colors"
             />
           </div>
@@ -569,10 +664,10 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           </div>
         </div>
 
-        {/* CARD 4: MEDIA UPLOADS & SCREENSHOTS */}
+        {/* CARD 4: MEDIA UPLOADS & INTERFACE GALLERY */}
         <div className="rounded-3xl border border-border/60 bg-card text-card-foreground p-6 sm:p-8 shadow-sm space-y-6">
           <h3 className="text-base font-bold text-foreground flex items-center gap-2 border-b border-border/60 pb-3">
-            <ImageIcon className="h-5 w-5 text-indigo-500" /> Project Media & Screenshots Gallery
+            <ImageIcon className="h-5 w-5 text-indigo-500" /> Interface Gallery Images
           </h3>
 
           {/* FEATURED IMAGE */}
@@ -618,7 +713,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           <div className="space-y-3 pt-4 border-t border-border/60">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Screenshots Gallery ({screenshots.length} uploaded)
+                Interface Gallery Images ({screenshots.length} uploaded)
               </label>
               <input
                 type="file"
@@ -639,7 +734,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
                 ) : (
                   <Plus className="h-3.5 w-3.5" />
                 )}
-                Add Screenshots
+                Add Gallery Images
               </button>
             </div>
 
@@ -778,10 +873,205 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
               ))}
             </ul>
           </div>
+        </div>
+
+        {/* CARD 6: CHALLENGES, SOLUTIONS, LESSONS LEARNED & ROADMAP */}
+        <div className="rounded-3xl border border-border/60 bg-card text-card-foreground p-6 sm:p-8 shadow-sm space-y-6">
+          <h3 className="text-base font-bold text-foreground flex items-center gap-2 border-b border-border/60 pb-3">
+            <CheckCircle2 className="h-5 w-5 text-indigo-500" /> Engineering Analysis & Future Roadmap
+          </h3>
+
+          {/* CHALLENGES ENCOUNTERED */}
+          <div className="space-y-3">
+            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Challenges Encountered
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={challengeInput}
+                onChange={(e) => setChallengeInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addChallenge();
+                  }
+                }}
+                placeholder="e.g. Preventing double-booking race conditions..."
+                className="w-full rounded-xl border border-border/80 bg-background/90 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:outline-hidden transition-colors"
+              />
+              <button
+                type="button"
+                onClick={addChallenge}
+                className="rounded-xl bg-foreground px-4 py-2.5 text-xs font-semibold text-background hover:scale-105 transition-transform min-h-[44px]"
+              >
+                Add Challenge
+              </button>
+            </div>
+
+            <ul className="space-y-2 pt-2">
+              {challenges.map((item, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-accent/20 px-3.5 py-2 text-xs text-foreground"
+                >
+                  <span>• {item}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeChallenge(idx)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* ENGINEERED SOLUTIONS */}
+          <div className="space-y-3 pt-4 border-t border-border/60">
+            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Engineered Solutions
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={solutionInput}
+                onChange={(e) => setSolutionInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addSolution();
+                  }
+                }}
+                placeholder="e.g. Implemented strict database transaction locks..."
+                className="w-full rounded-xl border border-border/80 bg-background/90 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:outline-hidden transition-colors"
+              />
+              <button
+                type="button"
+                onClick={addSolution}
+                className="rounded-xl bg-foreground px-4 py-2.5 text-xs font-semibold text-background hover:scale-105 transition-transform min-h-[44px]"
+              >
+                Add Solution
+              </button>
+            </div>
+
+            <ul className="space-y-2 pt-2">
+              {solutions.map((item, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-accent/20 px-3.5 py-2 text-xs text-foreground"
+                >
+                  <span>• {item}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeSolution(idx)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* LESSONS LEARNED */}
+          <div className="space-y-3 pt-4 border-t border-border/60">
+            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Lessons Learned
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={lessonInput}
+                onChange={(e) => setLessonInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addLesson();
+                  }
+                }}
+                placeholder="e.g. Automated validation prevents administrative booking errors..."
+                className="w-full rounded-xl border border-border/80 bg-background/90 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:outline-hidden transition-colors"
+              />
+              <button
+                type="button"
+                onClick={addLesson}
+                className="rounded-xl bg-foreground px-4 py-2.5 text-xs font-semibold text-background hover:scale-105 transition-transform min-h-[44px]"
+              >
+                Add Lesson
+              </button>
+            </div>
+
+            <ul className="space-y-2 pt-2">
+              {lessonsLearned.map((item, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-accent/20 px-3.5 py-2 text-xs text-foreground"
+                >
+                  <span>✓ {item}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeLesson(idx)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* FUTURE ROADMAP / PLANNED ENHANCEMENTS */}
+          <div className="space-y-3 pt-4 border-t border-border/60">
+            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Planned Enhancements & Future Roadmap
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={futureInput}
+                onChange={(e) => setFutureInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addFuture();
+                  }
+                }}
+                placeholder="e.g. Paystack payment gateway integration for online payments..."
+                className="w-full rounded-xl border border-border/80 bg-background/90 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:outline-hidden transition-colors"
+              />
+              <button
+                type="button"
+                onClick={addFuture}
+                className="rounded-xl bg-foreground px-4 py-2.5 text-xs font-semibold text-background hover:scale-105 transition-transform min-h-[44px]"
+              >
+                Add Roadmap Item
+              </button>
+            </div>
+
+            <ul className="space-y-2 pt-2">
+              {futureImprovements.map((item, idx) => (
+                <li
+                  key={idx}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-accent/20 px-3.5 py-2 text-xs text-foreground"
+                >
+                  <span>• {item}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeFuture(idx)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
 
           {/* CENTRAL ENGAGEMENT MODERATION NOTE */}
           {initialData?.slug && (
-            <div className="flex items-center justify-between rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-4 text-xs">
+            <div className="flex items-center justify-between rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-4 text-xs mt-6">
               <div className="flex items-center gap-2 text-indigo-500 font-semibold">
                 <HeartHandshake className="h-4 w-4" />
                 <span>Visitor Comments & Feedback Moderation</span>

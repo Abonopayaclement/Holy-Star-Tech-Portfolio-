@@ -28,6 +28,10 @@ const projectSchema = z.object({
   challenges: z.array(z.string()).default([]),
   solutions: z.array(z.string()).default([]),
   lessonsLearned: z.array(z.string()).default([]),
+  futureImprovements: z.array(z.string()).default([]),
+  systemArchitecture: z.string().optional().nullable(),
+  status: z.string().optional().nullable(),
+  classification: z.string().optional().nullable(),
 });
 
 export type ProjectInput = z.infer<typeof projectSchema>;
@@ -64,6 +68,7 @@ async function seedDefaultProjectsIfEmpty() {
             challenges: p.challenges,
             solutions: p.solutions,
             lessonsLearned: p.lessonsLearned,
+            futureImprovements: (p as any).futureImprovements || [],
           } as any,
         });
       }
@@ -171,6 +176,10 @@ export async function createProject(input: ProjectInput) {
         challenges: validated.challenges,
         solutions: validated.solutions,
         lessonsLearned: validated.lessonsLearned,
+        futureImprovements: validated.futureImprovements,
+        systemArchitecture: validated.systemArchitecture || null,
+        status: validated.status || "Completed",
+        classification: validated.classification || null,
       } as any,
     });
 
@@ -213,6 +222,10 @@ export async function updateProject(id: string, input: ProjectInput) {
         challenges: validated.challenges,
         solutions: validated.solutions,
         lessonsLearned: validated.lessonsLearned,
+        futureImprovements: validated.futureImprovements,
+        systemArchitecture: validated.systemArchitecture || null,
+        status: validated.status || "Completed",
+        classification: validated.classification || null,
       } as any,
     });
 

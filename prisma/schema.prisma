@@ -119,6 +119,10 @@ model Project {
   challenges      Json // Array of strings
   solutions       Json // Array of strings
   lessonsLearned  Json // Array of strings
+  futureImprovements Json? // Array of strings
+  systemArchitecture String? @db.Text
+  status          String?          @default("Completed")
+  classification  String?
   order           Int              @default(0)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt

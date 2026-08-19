@@ -2,10 +2,13 @@ import Link from "next/link";
 import { Logo } from "@/components/shared/Logo";
 import { footerNav } from "@/constants/navigation";
 import { siteConfig } from "@/config/site";
-import { socialLinksList } from "@/config/social";
+import { resolveSocialLinks } from "@/config/social";
+import { getPublicSocialLinksData } from "@/actions/profile";
 
-export function Footer() {
+export async function Footer() {
   const currentYear = new Date().getFullYear();
+  const dbMap = await getPublicSocialLinksData();
+  const socialLinks = resolveSocialLinks(dbMap);
 
   return (
     <footer className="border-t border-border/40 bg-background/50">
@@ -21,7 +24,7 @@ export function Footer() {
             </p>
 
             <div className="flex flex-wrap items-center gap-2 pt-2">
-              {socialLinksList.map((platform) => {
+              {socialLinks.map((platform) => {
                 const Icon = platform.icon;
                 return (
                   <a

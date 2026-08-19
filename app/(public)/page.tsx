@@ -163,16 +163,16 @@ export default async function HomePage() {
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-10">
         <div className="text-center space-y-3">
           <SectionHeader
-            badge="Articles & Writing"
+            badge="Blog Posts"
             title="Featured Blog Posts"
-            description="Articles, tutorials, and practical insights on web development, mobile applications, and software engineering."
+            description="Insights, tutorials, and practical guides on web development, mobile applications, and software engineering."
             align="center"
           />
         </div>
 
         {latestArticles.length === 0 ? (
           <div className="rounded-3xl border border-border/60 bg-card p-12 text-center text-muted-foreground">
-            No published articles available yet.
+            No published blog posts available yet.
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -203,9 +203,6 @@ export default async function HomePage() {
                     <div className="flex items-center justify-between gap-2">
                       <span className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold text-indigo-500">
                         {post.category || "Development"}
-                      </span>
-                      <span className="font-mono text-[11px] text-muted-foreground">
-                        {post.readTime || "3 min read"}
                       </span>
                     </div>
 

@@ -298,7 +298,7 @@ export default function PrivateEngagementPage() {
             }`}
           >
             <BookOpen className="h-4 w-4" />
-            <span>Blog & Article Engagement</span>
+            <span>Blog & Post Engagement</span>
             <span className="rounded-full bg-indigo-500/20 px-2.5 py-0.5 font-mono text-[11px] font-extrabold text-indigo-400">
               {data.blogPosts.length}
             </span>
@@ -529,7 +529,7 @@ export default function PrivateEngagementPage() {
                       >
                         <div className="space-y-1">
                           <span className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold text-indigo-500 uppercase tracking-wider">
-                            {activeTab === "BLOG" ? "Blog Article" : "Project"}
+                            {activeTab === "BLOG" ? "Blog Post" : "Project"}
                           </span>
                           <h4 className="text-base font-bold text-foreground">{item.title}</h4>
                           <p className="text-xs font-mono text-muted-foreground">Slug: /{item.slug}</p>
@@ -574,7 +574,7 @@ export default function PrivateEngagementPage() {
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/60 pb-3">
                           <div className="flex items-center gap-2">
                             <span className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold text-indigo-500 uppercase tracking-wider">
-                              {c.targetType === "BLOG" ? "Blog Article" : "Project"}
+                              {c.targetType === "BLOG" ? "Blog Post" : "Project"}
                             </span>
                             <span className="text-xs font-bold text-foreground">{c.itemTitle}</span>
                           </div>
@@ -761,7 +761,7 @@ export default function PrivateEngagementPage() {
                 <div className="space-y-4">
                   <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                     <Layers className="h-4 w-4 text-indigo-500" />
-                    {activeTab === "BLOG" ? "All Blog Articles Engagement" : "All Projects Engagement"} ({activeItems.length})
+                    {activeTab === "BLOG" ? "All Blog Posts Engagement" : "All Projects Engagement"} ({activeItems.length})
                   </h3>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -772,7 +772,7 @@ export default function PrivateEngagementPage() {
                       >
                         <div className="space-y-1">
                           <span className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold text-indigo-500 uppercase tracking-wider">
-                            {activeTab === "BLOG" ? "Article" : "Project"}
+                            {activeTab === "BLOG" ? "Post" : "Project"}
                           </span>
                           <h4 className="text-base font-bold text-foreground line-clamp-1">{item.title}</h4>
                           <p className="text-xs font-mono text-muted-foreground">/{item.slug}</p>

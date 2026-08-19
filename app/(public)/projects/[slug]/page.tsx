@@ -23,6 +23,7 @@ import { projectsData } from "@/constants/projects";
 import { siteConfig } from "@/config/site";
 import { getProjectBySlug } from "@/actions/projects";
 import { EngagementSection } from "@/components/public/EngagementSection";
+import { InterfaceGallery } from "@/components/public/InterfaceGallery";
 
 interface ProjectDetailsPageProps {
   params: Promise<{
@@ -52,6 +53,7 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
         title: dbProject.title,
         tagline: dbProject.tagline,
         fullDescription: dbProject.fullDescription,
+        systemArchitecture: (dbProject as any).systemArchitecture || null,
         category:
           (dbProject.categoryType as string) === "MOBILE_APP"
             ? "Mobile Applications"
@@ -63,6 +65,7 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
             ? "Other Projects"
             : "Web Applications",
         classification: (dbProject as any).classification || fallbackProject?.classification || "Project",
+        status: (dbProject as any).status || fallbackProject?.status || "Completed",
         gradient: dbProject.gradient || "from-amber-500/20 via-indigo-600/20 to-cyan-500/20",
         featuredImage: (dbProject as any).featuredImage,
         techStack: Array.isArray(dbProject.techStack) ? (dbProject.techStack as string[]) : [],
@@ -99,99 +102,110 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
           </Link>
         </div>
 
-        {/* CASE STUDY HERO BANNER */}
-        <div className="overflow-hidden rounded-3xl border border-border/80 bg-card shadow-2xl backdrop-blur-md">
-          <div
-            className={`relative flex min-h-[340px] w-full flex-col justify-between overflow-hidden bg-gradient-to-tr ${project.gradient} p-8 md:p-12`}
-          >
-            {project.featuredImage && (
-              <img
-                src={project.featuredImage}
-                alt={project.title}
-                className="absolute inset-0 h-full w-full object-cover opacity-25 mix-blend-overlay"
-              />
-            )}
-
-            <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/60 px-3.5 py-1 text-xs font-mono font-bold text-white backdrop-blur-md">
-                <FolderGit2 className="h-3.5 w-3.5 text-amber-400" />
-                <span>{project.classification ? `${project.classification} • ` : ""}Case Study • {project.category}</span>
+        {/* HERO SECTION CONTAINER */}
+        <div className="space-y-6">
+          {/* 1. HERO IMAGE (CLEARLY VISIBLE, PROMINENT, UN-CROPPED, NO OVERLAY) */}
+          {project.featuredImage && (
+            <div className="overflow-hidden rounded-3xl border border-border/80 bg-zinc-950/80 p-2 sm:p-4 shadow-2xl backdrop-blur-md">
+              <div className="relative flex w-full items-center justify-center overflow-hidden rounded-2xl bg-zinc-900/60 min-h-[260px] sm:min-h-[380px] max-h-[520px]">
+                <img
+                  src={project.featuredImage}
+                  alt={project.title}
+                  className="h-auto max-h-[500px] w-full object-contain mx-auto rounded-xl"
+                />
               </div>
-              <div className="text-xs font-mono text-white/90">
-                Lead Architect: <span className="font-bold">{siteConfig.author}</span>
+            </div>
+          )}
+
+          {/* 2. PROJECT TITLE & DETAILS (POSITIONED BELOW HERO IMAGE) */}
+          <div className="rounded-3xl border border-border/80 bg-card p-6 sm:p-10 shadow-xl space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/60 pb-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3.5 py-1 text-xs font-mono font-bold text-indigo-500">
+                  <FolderGit2 className="h-3.5 w-3.5" />
+                  <span>{project.classification ? `${project.classification} • ` : ""}Case Study • {project.category}</span>
+                </div>
+                {project.status && (
+                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-xs font-bold text-emerald-500">
+                    Status: {project.status}
+                  </span>
+                )}
+              </div>
+              <div className="text-xs font-mono text-muted-foreground">
+                Lead Architect: <span className="font-bold text-foreground">{siteConfig.author}</span>
               </div>
             </div>
 
-            <div className="relative z-10 mt-8 space-y-4">
-              <h1 className="text-3xl font-extrabold text-white sm:text-5xl lg:text-6xl tracking-tight drop-shadow-xs">
+            <div className="space-y-3">
+              <h1 className="text-3xl font-extrabold text-foreground sm:text-4xl lg:text-5xl tracking-tight">
                 {project.title}
               </h1>
 
-              <p className="max-w-3xl text-base sm:text-xl text-white/90 font-medium leading-relaxed drop-shadow-xs">
+              <p className="max-w-4xl text-base sm:text-xl text-muted-foreground font-medium leading-relaxed">
                 {project.tagline}
               </p>
 
               {project.version && (
-                <div className="inline-flex flex-wrap items-center gap-3 pt-2 text-xs font-mono text-emerald-300">
-                  <span className="rounded-full bg-emerald-950/80 border border-emerald-500/40 px-3 py-1 font-bold">
+                <div className="inline-flex flex-wrap items-center gap-3 pt-2 text-xs font-mono">
+                  <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 font-bold text-emerald-500">
                     Release Version: {project.version}
                   </span>
                   {project.androidVersion && (
-                    <span className="rounded-full bg-indigo-950/80 border border-indigo-500/40 px-3 py-1 text-indigo-300">
+                    <span className="rounded-full bg-indigo-500/10 border border-indigo-500/30 px-3 py-1 text-indigo-400 font-bold">
                       Target SDK: {project.androidVersion}
                     </span>
                   )}
                 </div>
               )}
             </div>
-          </div>
 
-          {/* ACTION LINKS BAR */}
-          <div className="flex flex-wrap items-center justify-between gap-6 border-t border-border/60 p-6 md:p-8 bg-card">
-            <div className="flex flex-wrap items-center gap-2">
-              {project.techStack.map((tech: string) => (
-                <span
-                  key={tech}
-                  className="rounded-lg border border-border/60 bg-accent/40 px-3 py-1 text-xs font-mono font-medium text-foreground"
-                >
-                  {tech}
-                </span>
-              ))}
-            </div>
+            {/* ACTION LINKS BAR */}
+            <div className="flex flex-wrap items-center justify-between gap-6 pt-4 border-t border-border/60">
+              <div className="flex flex-wrap items-center gap-2">
+                {project.techStack.map((tech: string) => (
+                  <span
+                    key={tech}
+                    className="rounded-lg border border-border/60 bg-accent/40 px-3 py-1 text-xs font-mono font-medium text-foreground"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              {project.githubUrl && (
-                <a
-                  href={project.githubUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-xl border border-border/80 bg-background px-4 py-2.5 text-xs font-semibold text-foreground hover:bg-accent transition-colors min-h-[44px]"
-                >
-                  <Github className="h-4 w-4 text-indigo-500" />
-                  GitHub Repository
-                </a>
-              )}
-              {project.liveUrl && (
-                <a
-                  href={project.liveUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-xl bg-foreground px-4 py-2.5 text-xs font-semibold text-background transition-transform hover:scale-105 min-h-[44px]"
-                >
-                  Live Demo
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              )}
-              {project.apkUrl && (
-                <a
-                  href={project.apkUrl}
-                  download
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md transition-transform hover:scale-105 min-h-[44px]"
-                >
-                  <Download className="h-4 w-4" />
-                  Download APK
-                </a>
-              )}
+              <div className="flex flex-wrap items-center gap-3">
+                {project.githubUrl && (
+                  <a
+                    href={project.githubUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl border border-border/80 bg-background px-4 py-2.5 text-xs font-semibold text-foreground hover:bg-accent transition-colors min-h-[44px]"
+                  >
+                    <Github className="h-4 w-4 text-indigo-500" />
+                    GitHub Repository
+                  </a>
+                )}
+                {project.liveUrl && (
+                  <a
+                    href={project.liveUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl bg-foreground px-4 py-2.5 text-xs font-semibold text-background transition-transform hover:scale-105 min-h-[44px]"
+                  >
+                    Live Demo
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                )}
+                {project.apkUrl && (
+                  <a
+                    href={project.apkUrl}
+                    download
+                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-md transition-transform hover:scale-105 min-h-[44px]"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download APK
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -215,8 +229,9 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
               <h2 className="text-xl font-bold text-foreground flex items-center gap-2 border-b border-border/60 pb-3">
                 <Database className="h-5 w-5 text-indigo-500" /> System Architecture & Engineering Approach
               </h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Designed for optimal type safety, modular maintainability, and client responsiveness. Utilizes clean code patterns, reactive state synchronization, and strict input validation.
+              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                {project.systemArchitecture ||
+                  "Designed for optimal type safety, modular maintainability, and client responsiveness. Utilizes clean code patterns, reactive state synchronization, and strict input validation."}
               </p>
               <div className="rounded-2xl border border-border/60 bg-accent/30 p-4 space-y-2 text-xs font-mono text-foreground">
                 <div className="flex items-center gap-2 text-indigo-500 font-bold">
@@ -287,33 +302,9 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
               </section>
             )}
 
-            {/* 5. SCREENSHOTS & MEDIA GALLERY */}
+            {/* 5. INTERFACE GALLERY WITH INTERACTIVE LIGHTBOX */}
             {project.screenshots && project.screenshots.length > 0 && (
-              <section className="rounded-3xl border border-border/80 bg-card p-6 sm:p-8 shadow-md space-y-4">
-                <h2 className="text-xl font-bold text-foreground border-b border-border/60 pb-3">
-                  Interface & Architecture Gallery
-                </h2>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {project.screenshots.map((screen: any, idx: number) => (
-                    <div
-                      key={idx}
-                      className="group overflow-hidden rounded-2xl border border-border/60 bg-accent/30 p-2.5 transition-all hover:border-indigo-500/40"
-                    >
-                      <div className="relative h-44 w-full overflow-hidden rounded-xl bg-black/40">
-                        <img
-                          src={screen.imagePath || "/logo.png"}
-                          alt={screen.title || "Screenshot"}
-                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <div className="mt-2.5">
-                        <h4 className="text-xs font-bold text-foreground">{screen.title}</h4>
-                        <p className="text-[11px] text-muted-foreground">{screen.subtitle}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
+              <InterfaceGallery screenshots={project.screenshots} />
             )}
           </div>
 
@@ -384,3 +375,4 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
     </div>
   );
 }
+

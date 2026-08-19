@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -16,7 +16,8 @@ import {
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { PageHeaderBanner } from "@/components/shared/PageHeaderBanner";
 import { siteConfig } from "@/config/site";
-import { socialLinksList } from "@/config/social";
+import { resolveSocialLinks, SocialPlatformConfig } from "@/config/social";
+import { getPublicSocialLinksData } from "@/actions/profile";
 import { submitContactMessage } from "@/actions/contact";
 
 const contactSchema = z.object({
@@ -31,6 +32,19 @@ type ContactFormValues = z.infer<typeof contactSchema>;
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [socials, setSocials] = useState<SocialPlatformConfig[]>([]);
+
+  useEffect(() => {
+    async function loadSocials() {
+      try {
+        const dbMap = await getPublicSocialLinksData();
+        setSocials(resolveSocialLinks(dbMap));
+      } catch (err) {
+        console.error("Failed to load socials:", err);
+      }
+    }
+    loadSocials();
+  }, []);
 
   const {
     register,
@@ -106,29 +120,31 @@ export default function ContactPage() {
               </div>
 
               {/* Social Channels */}
-              <div className="pt-4 border-t border-border/40 space-y-3">
-                <span className="text-xs font-semibold uppercase tracking-wider text-foreground">
-                  Connect on Social Networks
-                </span>
-                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-                  {socialLinksList.map((platform) => {
-                    const Icon = platform.icon;
-                    return (
-                      <a
-                        key={platform.id}
-                        href={platform.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={`flex items-center gap-2 rounded-xl border border-border/60 bg-background/80 px-3 py-2 text-xs font-semibold text-muted-foreground backdrop-blur-md transition-all duration-200 ${platform.color}`}
-                        aria-label={`${platform.name} Profile`}
-                      >
-                        <Icon className="h-4 w-4 shrink-0" />
-                        <span className="truncate">{platform.name}</span>
-                      </a>
-                    );
-                  })}
+              {socials.length > 0 && (
+                <div className="pt-4 border-t border-border/40 space-y-3">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-foreground">
+                    Connect on Social Networks
+                  </span>
+                  <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                    {socials.map((platform) => {
+                      const Icon = platform.icon;
+                      return (
+                        <a
+                          key={platform.id}
+                          href={platform.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`flex items-center gap-2 rounded-xl border border-border/60 bg-background/80 px-3 py-2 text-xs font-semibold text-muted-foreground backdrop-blur-md transition-all duration-200 ${platform.color}`}
+                          aria-label={`${platform.name} Profile`}
+                        >
+                          <Icon className="h-4 w-4 shrink-0" />
+                          <span className="truncate">{platform.name}</span>
+                        </a>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 

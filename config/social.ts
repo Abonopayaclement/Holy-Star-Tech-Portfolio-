@@ -98,3 +98,28 @@ export const socialPlatforms: Record<string, SocialPlatformConfig> = {
 export const socialLinksList = Object.values(socialPlatforms).filter(
   (platform) => platform.enabled !== false
 );
+
+export function resolveSocialLinks(dbMap?: Record<string, string>): SocialPlatformConfig[] {
+  if (!dbMap || Object.keys(dbMap).length === 0) {
+    // If no DB map provided, fallback to socialLinksList filtering out dummy '#' links
+    return socialLinksList.filter((p) => p.url && p.url.trim() !== "" && p.url.trim() !== "#");
+  }
+
+  const platforms = Object.values(socialPlatforms);
+  const result: SocialPlatformConfig[] = [];
+
+  for (const plat of platforms) {
+    const key = plat.id.toLowerCase();
+    const url = dbMap[key] || (key === "x" ? dbMap["twitter"] : key === "twitter" ? dbMap["x"] : undefined);
+
+    if (url && url.trim() !== "" && url.trim() !== "#") {
+      result.push({
+        ...plat,
+        url: url.trim(),
+        enabled: true,
+      });
+    }
+  }
+
+  return result;
+}

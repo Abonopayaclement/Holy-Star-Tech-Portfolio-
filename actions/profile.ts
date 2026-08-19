@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireAdminSession } from "@/lib/auth-guard";
 
 // --------------------------------------------------------
 // ABOUT ME & PROFILE MANAGEMENT
@@ -37,12 +38,12 @@ export async function getProfileData() {
 }
 
 export async function updateProfileData(data: {
-  authorName: string;
-  headline: string;
-  bio: string;
+  authorName?: string;
+  headline?: string;
+  bio?: string;
   philosophy?: string;
-  location: string;
-  email: string;
+  location?: string;
+  email?: string;
   phone?: string;
   whatsApp?: string;
   profilePhoto?: string;
@@ -51,26 +52,27 @@ export async function updateProfileData(data: {
   try {
     const existing = await (prisma as any).aboutInfo.findFirst();
     if (existing) {
+      const updatePayload: any = {};
+      if (data.authorName !== undefined) updatePayload.authorName = data.authorName;
+      if (data.headline !== undefined) updatePayload.headline = data.headline;
+      if (data.bio !== undefined) updatePayload.bio = data.bio;
+      if (data.philosophy !== undefined) updatePayload.philosophy = data.philosophy;
+      if (data.location !== undefined) updatePayload.location = data.location;
+      if (data.email !== undefined) updatePayload.email = data.email;
+
       await (prisma as any).aboutInfo.update({
         where: { id: existing.id },
-        data: {
-          authorName: data.authorName,
-          headline: data.headline,
-          bio: data.bio,
-          philosophy: data.philosophy || "",
-          location: data.location,
-          email: data.email,
-        },
+        data: updatePayload,
       });
     } else {
       await (prisma as any).aboutInfo.create({
         data: {
-          authorName: data.authorName,
-          headline: data.headline,
-          bio: data.bio,
+          authorName: data.authorName || "Abonopaya Clement Ayebono",
+          headline: data.headline || "Full-Stack Software Engineer",
+          bio: data.bio || "",
           philosophy: data.philosophy || "",
-          location: data.location,
-          email: data.email,
+          location: data.location || "Ghana",
+          email: data.email || "clement@holystar.tech",
         },
       });
     }
@@ -301,29 +303,55 @@ export async function deleteSkill(id: string) {
 // SOCIAL MEDIA CENTRAL MANAGEMENT
 // --------------------------------------------------------
 
+const ALL_SOCIAL_PLATFORMS = [
+  "github",
+  "linkedin",
+  "facebook",
+  "instagram",
+  "tiktok",
+  "twitter",
+  "whatsapp",
+  "youtube",
+] as const;
+
 export async function getSocialLinksData() {
   try {
     const links = await (prisma as any).socialLink.findMany({
       orderBy: { order: "asc" },
     });
 
-    const platforms = ["github", "linkedin", "facebook", "instagram", "tiktok", "twitter"];
-    
-    const missingPlatforms = platforms.filter(
-      (plat) => !links.some((l: any) => l.platform === plat)
+    const missingPlatforms = ALL_SOCIAL_PLATFORMS.filter(
+      (plat) => !links.some((l: any) => l.platform.toLowerCase() === plat)
     );
 
     if (missingPlatforms.length > 0) {
       const toCreate = missingPlatforms.map((plat) => {
-        let defaultUrl = "#";
+        let defaultUrl = "";
         if (plat === "github") defaultUrl = "https://github.com/ayebonoclement";
         if (plat === "linkedin") defaultUrl = "https://linkedin.com/in/ayebonoclement";
-        return { platform: plat, url: defaultUrl, order: platforms.indexOf(plat) + 1 };
+        return {
+          platform: plat,
+          url: defaultUrl,
+          order: ALL_SOCIAL_PLATFORMS.indexOf(plat) + 1,
+        };
       });
 
-      await (prisma as any).socialLink.createMany({ data: toCreate, skipDuplicates: true });
-      return await (prisma as any).socialLink.findMany({ orderBy: { order: "asc" } });
+      await (prisma as any).socialLink.createMany({
+        data: toCreate,
+        skipDuplicates: true,
+      });
     }
+
+    const allLinks = await (prisma as any).socialLink.findMany({
+      orderBy: { order: "asc" },
+    });
+
+    return allLinks.map((item: any) => ({
+      id: item.id,
+      platform: item.platform.toLowerCase(),
+      url: item.url || "",
+      order: item.order,
+    }));
   } catch (error) {
     console.error("Failed to fetch social links:", error);
     return [];
@@ -331,22 +359,30 @@ export async function getSocialLinksData() {
 }
 
 export async function updateSocialLinksData(linksMap: Record<string, string>) {
-  try {
-    for (const [platform, url] of Object.entries(linksMap)) {
-      if (platform === "youtube") continue; // Exclude YouTube explicitly
+  await requireAdminSession();
 
-      const existing = await (prisma as any).socialLink.findUnique({
+  try {
+    for (const [platformKey, rawUrl] of Object.entries(linksMap)) {
+      const platform = platformKey.toLowerCase().trim();
+      const url = (rawUrl || "").trim();
+
+      const existing = await (prisma as any).socialLink.findFirst({
         where: { platform },
       });
 
       if (existing) {
         await (prisma as any).socialLink.update({
-          where: { platform },
-          data: { url: url.trim() },
+          where: { id: existing.id },
+          data: { url },
         });
       } else {
+        const orderIdx = ALL_SOCIAL_PLATFORMS.indexOf(platform as any);
         await (prisma as any).socialLink.create({
-          data: { platform, url: url.trim() },
+          data: {
+            platform,
+            url,
+            order: orderIdx >= 0 ? orderIdx + 1 : 99,
+          },
         });
       }
     }
@@ -355,10 +391,37 @@ export async function updateSocialLinksData(linksMap: Record<string, string>) {
     revalidatePath("/about");
     revalidatePath("/contact");
     revalidatePath("/private");
+    revalidatePath("/private/profile");
 
     return { success: true };
   } catch (error: any) {
     console.error("Failed to update social links:", error);
     return { success: false, error: error.message || "Failed to update social links." };
+  }
+}
+
+export async function getPublicSocialLinksData() {
+  try {
+    const links = await (prisma as any).socialLink.findMany({
+      orderBy: { order: "asc" },
+    });
+
+    const dbMap: Record<string, string> = {};
+    if (Array.isArray(links)) {
+      links.forEach((l: any) => {
+        const p = l.platform.toLowerCase().trim();
+        const url = (l.url || "").trim();
+        if (url && url !== "#") {
+          dbMap[p] = url;
+          if (p === "twitter") dbMap["x"] = url;
+          if (p === "x") dbMap["twitter"] = url;
+        }
+      });
+    }
+
+    return dbMap;
+  } catch (error) {
+    console.error("Failed to fetch public social links:", error);
+    return {};
   }
 }

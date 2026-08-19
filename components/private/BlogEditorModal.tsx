@@ -227,7 +227,7 @@ export function BlogEditorModal({
   // Submit Handler: publishNow boolean differentiates "Save as Draft" vs "Publish"
   const handleSubmit = async (publishNow: boolean) => {
     if (!title.trim() || !slug.trim() || !content.trim()) {
-      toast.error("Please fill in Title, Slug, and Article Content.");
+      toast.error("Please fill in Title, Slug, and Post Content.");
       return;
     }
 
@@ -292,7 +292,7 @@ export function BlogEditorModal({
             </div>
             <div>
               <h2 className="text-lg font-bold text-foreground">
-                {initialData ? "Edit Blog Article" : "Create New Blog Article"}
+                {initialData ? "Edit Blog Post" : "Create New Blog Post"}
               </h2>
               <p className="text-xs text-muted-foreground">
                 Rich Text Editor with Image Uploads & Mobile Support
@@ -315,7 +315,7 @@ export function BlogEditorModal({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Article Title *
+                Post Title *
               </label>
               <input
                 type="text"
@@ -340,8 +340,8 @@ export function BlogEditorModal({
             </div>
           </div>
 
-          {/* CATEGORY, READ TIME & FEATURED TOGGLE */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {/* CATEGORY & FEATURED TOGGLE */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Category
@@ -360,19 +360,6 @@ export function BlogEditorModal({
               </select>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Reading Time
-              </label>
-              <input
-                type="text"
-                value={readTime}
-                onChange={(e) => setReadTime(e.target.value)}
-                placeholder="e.g. 5 min read"
-                className="w-full rounded-xl border border-border/80 bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:outline-hidden transition-colors"
-              />
-            </div>
-
             <div className="flex items-center gap-3 pt-6">
               <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-zinc-900 dark:text-zinc-100">
                 <input
@@ -381,7 +368,7 @@ export function BlogEditorModal({
                   onChange={(e) => setFeatured(e.target.checked)}
                   className="h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500"
                 />
-                Mark as Featured Article
+                Mark as Featured Post
               </label>
             </div>
           </div>
@@ -395,7 +382,7 @@ export function BlogEditorModal({
               rows={2}
               value={excerpt}
               onChange={(e) => setExcerpt(e.target.value)}
-              placeholder="Short summary displayed on article lists..."
+              placeholder="Short summary displayed on post lists..."
               className="w-full rounded-xl border border-border/80 bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:outline-hidden resize-none transition-colors"
             />
           </div>
@@ -572,11 +559,11 @@ export function BlogEditorModal({
                   <span className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold text-indigo-500">
                     {category}
                   </span>
-                  <h1 className="text-2xl font-bold text-foreground mt-2">{title || "Untitled Article"}</h1>
+                  <h1 className="text-2xl font-bold text-foreground mt-2">{title || "Untitled Post"}</h1>
                   <p className="text-xs text-muted-foreground mt-1">{excerpt}</p>
                 </div>
                 <div className="prose dark:prose-invert max-w-none text-xs leading-relaxed text-foreground whitespace-pre-wrap">
-                  {content || "No article content written yet..."}
+                  {content || "No post content written yet..."}
                 </div>
               </div>
             ) : (
@@ -684,7 +671,7 @@ export function BlogEditorModal({
               ) : (
                 <Send className="h-4 w-4" />
               )}
-              <span>Publish Article</span>
+              <span>Publish Post</span>
             </button>
           </div>
         </div>
@@ -705,7 +692,7 @@ export function BlogEditorModal({
       <PromotionKitModal
         isOpen={promoKitOpen}
         onClose={() => setPromoKitOpen(false)}
-        title={title || "Untitled Article"}
+        title={title || "Untitled Post"}
         excerpt={excerpt}
         url={`https://holystar.tech/blog/${slug}`}
         image={images[0]}

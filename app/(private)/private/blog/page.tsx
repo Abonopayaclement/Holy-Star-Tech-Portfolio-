@@ -128,9 +128,9 @@ export default function PrivateBlogPage() {
         {/* TOP HEADER & ACTION BAR */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border/60 pb-6">
           <div>
-            <h2 className="text-xl font-bold text-foreground">Blog Articles & Drafts</h2>
+            <h2 className="text-xl font-bold text-foreground">Blog Posts & Drafts</h2>
             <p className="text-xs text-muted-foreground">
-              Write, edit, manage attachments, publish, and unpublish developer journal articles.
+              Write, edit, manage attachments, publish, and unpublish blog posts.
             </p>
           </div>
 
@@ -140,7 +140,7 @@ export default function PrivateBlogPage() {
             className="inline-flex items-center gap-2 rounded-xl bg-foreground px-4 py-2.5 text-xs font-semibold text-background shadow-md transition-transform hover:scale-105 min-h-[44px]"
           >
             <Plus className="h-4 w-4" />
-            Create Article
+            Create Post
           </button>
         </div>
 
@@ -155,7 +155,7 @@ export default function PrivateBlogPage() {
                 : "border border-border/60 bg-background/80 text-muted-foreground hover:bg-accent hover:text-foreground"
             }`}
           >
-            All Articles ({posts.length})
+            All Posts ({posts.length})
           </button>
 
           <button
@@ -192,13 +192,13 @@ export default function PrivateBlogPage() {
         ) : filteredPosts.length === 0 ? (
           <div className="rounded-3xl border border-border/60 bg-background/80 p-12 text-center backdrop-blur-md space-y-4">
             <BookOpen className="mx-auto h-12 w-12 text-indigo-500 opacity-80" />
-            <h3 className="text-lg font-bold text-foreground">No Articles Found</h3>
+            <h3 className="text-lg font-bold text-foreground">No Posts Found</h3>
             <p className="text-xs text-muted-foreground max-w-md mx-auto">
               {activeFilter === "published"
-                ? "No published articles currently exist."
+                ? "No published blog posts currently exist."
                 : activeFilter === "drafts"
                 ? "No unpublished drafts found."
-                : "Get started by creating your first technical blog article."}
+                : "Get started by creating your first technical blog post."}
             </p>
             <button
               type="button"
@@ -206,7 +206,7 @@ export default function PrivateBlogPage() {
               className="inline-flex items-center gap-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-xs font-semibold text-indigo-400 hover:bg-indigo-500/20"
             >
               <Plus className="h-4 w-4" />
-              Create Article
+              Create Post
             </button>
           </div>
         ) : (

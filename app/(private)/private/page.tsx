@@ -82,7 +82,7 @@ export default function PrivateDashboardHome() {
               className="inline-flex items-center gap-2 rounded-xl bg-foreground px-4 py-2.5 text-xs font-semibold text-background shadow-md transition-transform hover:scale-105 min-h-[44px]"
             >
               <Plus className="h-4 w-4" />
-              Create Article
+              Create Post
             </Link>
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function PrivateDashboardHome() {
 
           {/* Blog Card */}
           <DashboardCard
-            title="Blog & Articles"
+            title="Blog Posts"
             value={loading ? "..." : metrics.blog.published}
             icon={BookOpen}
             gradient="from-indigo-600/20 via-purple-600/20 to-pink-500/20"

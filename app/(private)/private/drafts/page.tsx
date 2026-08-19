@@ -133,7 +133,7 @@ export default function PrivateDraftsPage() {
             <FileEdit className="mx-auto h-12 w-12 text-pink-500 opacity-80" />
             <h3 className="text-lg font-bold text-foreground">No Draft Posts Found</h3>
             <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              You currently have no unpublished drafts. Create a draft article to refine content before publishing live.
+              You currently have no unpublished drafts. Create a draft post to refine content before publishing live.
             </p>
             <button
               type="button"

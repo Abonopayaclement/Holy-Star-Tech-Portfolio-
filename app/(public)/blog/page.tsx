@@ -172,7 +172,7 @@ export default function BlogPage() {
         <PageHeaderBanner
           badge="Development Journal"
           title="Software Engineering Blog"
-          description="In-depth tutorials, system design breakdowns, and technical articles on full-stack web development."
+          description="In-depth tutorials, system design breakdowns, and technical posts on full-stack web development."
           gradientClass="bg-gradient-to-br from-slate-950 via-purple-950/80 to-slate-900"
           align="center"
           size="compact"
@@ -187,7 +187,7 @@ export default function BlogPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder="Instant search articles by title, category, or content..."
+              placeholder="Instant search posts by title, category, or content..."
               className="w-full rounded-2xl border border-border/80 bg-background/90 pl-11 pr-4 py-3 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground shadow-sm focus:border-indigo-500 focus:outline-hidden transition-colors"
             />
           </div>
@@ -218,7 +218,7 @@ export default function BlogPage() {
         {paginatedArticles.length === 0 ? (
           <div className="mt-12 rounded-3xl border border-border/60 bg-card p-12 text-center text-muted-foreground space-y-3">
             <BookOpen className="mx-auto h-12 w-12 text-amber-500 opacity-80" />
-            <h3 className="text-lg font-bold text-foreground">No Articles Found</h3>
+            <h3 className="text-lg font-bold text-foreground">No Posts Found</h3>
             <p className="text-xs text-muted-foreground">
               Try adjusting your search query or category filter.
             </p>
@@ -245,9 +245,6 @@ export default function BlogPage() {
                   <div className="flex items-center justify-between gap-2">
                     <span className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold text-indigo-500">
                       {article.category}
-                    </span>
-                    <span className="font-mono text-[11px] text-muted-foreground">
-                      3 min read
                     </span>
                   </div>
 
@@ -367,7 +364,7 @@ function BlogCardEngagement({ slug, title }: { slug: string; title: string }) {
         <button
           type="button"
           onClick={handleLike}
-          aria-label="Like article"
+          aria-label="Like post"
           className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 transition-all active:scale-95 min-h-[34px] ${
             hasLiked
               ? "border-emerald-500/50 bg-emerald-500/20 text-emerald-500 font-bold"
@@ -381,7 +378,7 @@ function BlogCardEngagement({ slug, title }: { slug: string; title: string }) {
         <button
           type="button"
           onClick={() => setCommentModalOpen(true)}
-          aria-label="Comment on article"
+          aria-label="Comment on post"
           className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-background/80 px-3 py-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-all active:scale-95 min-h-[34px]"
         >
           <MessageSquare className="h-3.5 w-3.5 text-indigo-500" />

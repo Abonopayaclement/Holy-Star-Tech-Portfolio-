@@ -38,12 +38,12 @@ export function PromotionKitModal({
 
   if (!isOpen) return null;
 
-  const captionText = `🚀 New Article: "${title}"\n\n${excerpt}\n\nRead the full post here: ${url}\n\n#HolyStarTech #SoftwareArchitecture #WebDev #Engineering`;
+  const captionText = `🚀 New Post: "${title}"\n\n${excerpt}\n\nRead the full post here: ${url}\n\n#HolyStarTech #SoftwareArchitecture #WebDev #Engineering`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(url);
     setCopiedLink(true);
-    toast.success("Article link copied to clipboard!");
+    toast.success("Post link copied to clipboard!");
     setTimeout(() => setCopiedLink(false), 2500);
   };
 
@@ -78,7 +78,7 @@ export function PromotionKitModal({
                 Social Promotion Kit
               </h3>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Share & promote your article across social networks
+                Share & promote your post across social networks
               </p>
             </div>
           </div>
@@ -127,7 +127,7 @@ export function PromotionKitModal({
               ) : (
                 <Copy className="h-4 w-4" />
               )}
-              <span>{copiedLink ? "Link Copied!" : "Copy Article Link"}</span>
+              <span>{copiedLink ? "Link Copied!" : "Copy Post Link"}</span>
             </button>
 
             <button

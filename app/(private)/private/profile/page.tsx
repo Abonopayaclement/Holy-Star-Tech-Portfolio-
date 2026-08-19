@@ -663,6 +663,8 @@ export default function PrivateProfilePage() {
                     { key: "instagram", label: "Instagram Profile URL", placeholder: "https://instagram.com/username" },
                     { key: "tiktok", label: "TikTok Profile URL", placeholder: "https://tiktok.com/@username" },
                     { key: "twitter", label: "X / Twitter Profile URL", placeholder: "https://x.com/username" },
+                    { key: "whatsapp", label: "WhatsApp Direct URL", placeholder: "https://wa.me/233000000000" },
+                    { key: "youtube", label: "YouTube Channel URL", placeholder: "https://youtube.com/@channel" },
                   ].map((soc) => (
                     <div key={soc.key} className="space-y-1.5">
                       <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

@@ -33,8 +33,8 @@ export async function generateMetadata({
 
   if (!post) {
     return {
-      title: "Article Not Found | Holy Star Tech",
-      description: "The requested engineering article could not be found.",
+      title: "Post Not Found | Holy Star Tech",
+      description: "The requested engineering post could not be found.",
     };
   }
 
