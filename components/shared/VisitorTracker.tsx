@@ -81,7 +81,7 @@ export function VisitorTracker() {
             keepalive: true,
           }).catch(() => {});
         }
-      } catch (err) {
+      } catch {
         // Silent failure so user navigation is never affected
       }
     }, 300);

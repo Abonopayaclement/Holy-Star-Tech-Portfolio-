@@ -69,7 +69,7 @@ export default function TermsPage() {
               This website contains links to external third-party platforms (e.g., GitHub, live project deployments, LinkedIn). We are not responsible for the content, privacy policies, or practices of third-party services.
             </p>
             <p className="text-muted-foreground">
-              All information and downloadable resources are provided "as is" without warranty of any kind. <strong className="text-foreground">{siteConfig.author}</strong> shall not be liable for any direct or indirect damages resulting from site usage.
+              All information and downloadable resources are provided &quot;as is&quot; without warranty of any kind. <strong className="text-foreground">{siteConfig.author}</strong> shall not be liable for any direct or indirect damages resulting from site usage.
             </p>
           </div>
 

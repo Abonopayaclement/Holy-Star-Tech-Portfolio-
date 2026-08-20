@@ -7,7 +7,7 @@ export interface ScreenshotItem {
   title?: string;
   subtitle?: string;
   aspect?: string;
-  imagePath: string;
+  imagePath?: string;
 }
 
 interface InterfaceGalleryProps {

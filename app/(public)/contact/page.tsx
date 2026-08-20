@@ -5,15 +5,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import { FaGithub, FaLinkedin, FaTwitter, FaEnvelope } from "react-icons/fa";
 import {
   CheckCircle2,
   Clock,
   Mail,
   Send,
-  Sparkles,
 } from "lucide-react";
-import { SectionHeader } from "@/components/shared/SectionHeader";
 import { PageHeaderBanner } from "@/components/shared/PageHeaderBanner";
 import { siteConfig } from "@/config/site";
 import { resolveSocialLinks, SocialPlatformConfig } from "@/config/social";
@@ -66,7 +63,7 @@ export default function ContactPage() {
       } else {
         toast.error("Failed to send message. Please try again.");
       }
-    } catch (err: any) {
+    } catch {
       toast.error("An error occurred while sending your message.");
     } finally {
       setIsSubmitting(false);

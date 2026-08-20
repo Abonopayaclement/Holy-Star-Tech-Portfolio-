@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Bell, Check, Clock, Globe, Mail, Menu, MessageSquare, ShieldCheck, X } from "lucide-react";
+import { Bell, Menu, ShieldCheck, X } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { siteConfig } from "@/config/site";
 import { getDashboardNotifications, markAllNotificationsAsRead, markNotificationAsRead } from "@/actions/notifications";
@@ -10,12 +10,22 @@ interface DashboardHeaderProps {
   onOpenMobileSidebar: () => void;
 }
 
+type NotificationItem = {
+  id: string;
+  title: string;
+  message: string;
+  type?: string;
+  targetUrl?: string;
+  isRead: boolean;
+  createdAt: string | Date;
+};
+
 export function DashboardHeader({
   title,
   onOpenMobileSidebar,
 }: DashboardHeaderProps) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
   const loadNotifications = async () => {
@@ -175,7 +185,7 @@ export function DashboardHeader({
   );
 }
 
-function formatTimeAgo(dateStr: string) {
+function formatTimeAgo(dateStr: string | Date) {
   try {
     const date = new Date(dateStr);
     const now = new Date();

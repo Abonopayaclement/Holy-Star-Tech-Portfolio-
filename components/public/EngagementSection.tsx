@@ -179,7 +179,7 @@ export function EngagementSection({ targetType, slug, itemTitle }: EngagementSec
                   </div>
 
                   <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line font-sans">
-                    "{review.content}"
+                    &ldquo;{review.content}&rdquo;
                   </p>
 
                   {/* VISUALLY DISTINCT ADMIN REPLY UNDERNEATH */}
@@ -190,7 +190,7 @@ export function EngagementSection({ targetType, slug, itemTitle }: EngagementSec
                         <span>Admin Reply</span>
                       </div>
                       <p className="text-foreground leading-relaxed text-xs">
-                        "{review.adminReply}"
+                        &ldquo;{review.adminReply}&rdquo;
                       </p>
                     </div>
                   )}
@@ -225,7 +225,7 @@ export function EngagementSection({ targetType, slug, itemTitle }: EngagementSec
   );
 }
 
-function formatTimeAgo(dateStr: string) {
+function formatTimeAgo(dateStr: string | Date) {
   try {
     const date = new Date(dateStr);
     const now = new Date();

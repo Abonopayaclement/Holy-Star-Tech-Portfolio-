@@ -2,9 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
-  ArrowUpRight,
   CheckCircle2,
-  Code2,
   Database,
   Download,
   ExternalLink,
@@ -12,7 +10,6 @@ import {
   Github,
   Layers,
   Lightbulb,
-  Play,
   Rocket,
   ShieldAlert,
   Sparkles,
@@ -53,7 +50,7 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
         title: dbProject.title,
         tagline: dbProject.tagline,
         fullDescription: dbProject.fullDescription,
-        systemArchitecture: (dbProject as any).systemArchitecture || null,
+        systemArchitecture: dbProject.systemArchitecture || null,
         category:
           (dbProject.categoryType as string) === "MOBILE_APP"
             ? "Mobile Applications"
@@ -64,26 +61,48 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
             : (dbProject.categoryType as string) === "OTHER"
             ? "Other Projects"
             : "Web Applications",
-        classification: (dbProject as any).classification || fallbackProject?.classification || "Project",
-        status: (dbProject as any).status || fallbackProject?.status || "Completed",
+        classification: dbProject.classification || fallbackProject?.classification || "Project",
+        status: dbProject.status || fallbackProject?.status || "Completed",
         gradient: dbProject.gradient || "from-amber-500/20 via-indigo-600/20 to-cyan-500/20",
-        featuredImage: (dbProject as any).featuredImage,
+        featuredImage: dbProject.featuredImage,
         techStack: Array.isArray(dbProject.techStack) ? (dbProject.techStack as string[]) : [],
         features: Array.isArray(dbProject.features) ? (dbProject.features as string[]) : [],
-        screenshots: Array.isArray(dbProject.screenshots) ? (dbProject.screenshots as any[]) : [],
+        screenshots: Array.isArray(dbProject.screenshots) ? (dbProject.screenshots as Array<{ title?: string; subtitle?: string; aspect?: string; imagePath?: string }>) : [],
         githubUrl: dbProject.githubUrl,
         liveUrl: dbProject.liveUrl,
         apkUrl: dbProject.apkUrl,
-        version: (dbProject as any).version,
-        androidVersion: (dbProject as any).androidVersion,
+        version: dbProject.version,
+        androidVersion: dbProject.androidVersion,
         challenges: Array.isArray(dbProject.challenges) ? (dbProject.challenges as string[]) : [],
         solutions: Array.isArray(dbProject.solutions) ? (dbProject.solutions as string[]) : [],
         lessonsLearned: Array.isArray(dbProject.lessonsLearned) ? (dbProject.lessonsLearned as string[]) : [],
-        futureImprovements: Array.isArray((dbProject as any).futureImprovements)
-          ? ((dbProject as any).futureImprovements as string[])
+          futureImprovements: Array.isArray(dbProject.futureImprovements)
+          ? (dbProject.futureImprovements as string[])
           : fallbackProject?.futureImprovements || [],
       }
-    : (fallbackProject as any);
+    : {
+        title: fallbackProject!.title,
+        tagline: fallbackProject!.tagline,
+        fullDescription: fallbackProject!.fullDescription,
+        systemArchitecture: fallbackProject!.systemArchitecture || null,
+        category: fallbackProject!.category,
+        classification: fallbackProject!.classification || "Project",
+        status: fallbackProject!.status || "Completed",
+        gradient: fallbackProject!.gradient || "from-amber-500/20 via-indigo-600/20 to-cyan-500/20",
+        featuredImage: fallbackProject!.featuredImage || null,
+        techStack: fallbackProject!.techStack || [],
+        features: fallbackProject!.features || [],
+        screenshots: fallbackProject!.screenshots || [],
+        githubUrl: fallbackProject!.githubUrl || null,
+        liveUrl: fallbackProject!.liveUrl || null,
+        apkUrl: fallbackProject!.apkUrl || null,
+        version: fallbackProject!.version || null,
+        androidVersion: fallbackProject!.androidVersion || null,
+        challenges: fallbackProject!.challenges || [],
+        solutions: fallbackProject!.solutions || [],
+        lessonsLearned: fallbackProject!.lessonsLearned || [],
+        futureImprovements: fallbackProject!.futureImprovements || [],
+      };
 
   return (
     <div className="relative overflow-hidden pt-8 pb-24">

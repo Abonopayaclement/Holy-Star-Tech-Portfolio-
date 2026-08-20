@@ -3,7 +3,7 @@ import { recordVisitorEvent } from "@/actions/analytics";
 
 export async function POST(req: NextRequest) {
   try {
-    let body: any = {};
+    let body: Record<string, string | undefined> = {};
     try {
       body = await req.json();
     } catch {

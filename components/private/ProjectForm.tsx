@@ -17,12 +17,11 @@ import {
   Send,
   Trash2,
   Upload,
-  Video,
   X,
 } from "lucide-react";
 import Link from "next/link";
 import { createProject, updateProject, ProjectInput } from "@/actions/projects";
-import { Heart, HeartHandshake, MessageSquare } from "lucide-react";
+import { HeartHandshake } from "lucide-react";
 
 interface ProjectFormProps {
   initialData?: {
@@ -42,7 +41,7 @@ interface ProjectFormProps {
     gradient?: string;
     techStack: string[];
     features: string[];
-    screenshots: any[];
+    screenshots: Array<{ title: string; subtitle: string; aspect: string; imagePath: string }>;
     githubUrl?: string | null;
     liveUrl?: string | null;
     apkUrl?: string | null;
@@ -69,13 +68,13 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
     initialData?.fullDescription || ""
   );
   const [systemArchitecture, setSystemArchitecture] = useState(
-    (initialData as any)?.systemArchitecture || ""
+    initialData?.systemArchitecture || ""
   );
   const [classification, setClassification] = useState(
-    (initialData as any)?.classification || "Personal Project"
+    initialData?.classification || "Personal Project"
   );
   const [status, setStatus] = useState(
-    (initialData as any)?.status || "Completed"
+    initialData?.status || "Completed"
   );
   const [categoryType, setCategoryType] = useState<
     "WEB_APP" | "MOBILE_APP" | "UI_UX" | "ACADEMIC" | "OTHER"
@@ -128,13 +127,12 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
   const [lessonInput, setLessonInput] = useState("");
 
   const [futureImprovements, setFutureImprovements] = useState<string[]>(
-    (initialData as any)?.futureImprovements || []
+    initialData?.futureImprovements || []
   );
   const [futureInput, setFutureInput] = useState("");
 
   const featuredImageInputRef = useRef<HTMLInputElement>(null);
   const screenshotInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
   const apkInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-generate slug
@@ -170,8 +168,8 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
         throw new Error(data.error || "Upload failed");
       }
       return data.url;
-    } catch (err: any) {
-      toast.error(err.message || "Failed to upload file.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to upload file.");
       return null;
     } finally {
       setUploadingField(null);
@@ -197,12 +195,13 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
     if (!files || files.length === 0) return;
 
     for (let i = 0; i < files.length; i++) {
-      const url = await uploadFile(files[i], "screenshots");
+      const file = files[i];
+      const url = await uploadFile(file, "screenshots");
       if (url) {
         setScreenshots((prev) => [
           ...prev,
           {
-            title: files[i].name.replace(/\.[^/.]+$/, ""),
+            title: file.name.split(".")[0] || "Screenshot",
             subtitle: "System Interface Screen",
             aspect: "aspect-video",
             imagePath: url,
@@ -210,86 +209,97 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
         ]);
       }
     }
-    toast.success("Screenshot(s) added to gallery!");
+    toast.success("Screenshots uploaded successfully!");
   };
 
   const handleApkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const url = await uploadFile(file, "apk");
+    const url = await uploadFile(file, "apkUrl");
     if (url) {
       setApkUrl(url);
-      toast.success("Android APK file uploaded successfully!");
+      toast.success("APK file uploaded successfully!");
     }
   };
 
-  // Tech Stack Handlers
+  // Add Item to Dynamic Array Helpers
   const addTech = () => {
-    if (!techInput.trim()) return;
-    if (!techStack.includes(techInput.trim())) {
-      setTechStack([...techStack, techInput.trim()]);
+    if (techInput.trim() && !techStack.includes(techInput.trim())) {
+      setTechStack((prev) => [...prev, techInput.trim()]);
+      setTechInput("");
     }
-    setTechInput("");
   };
 
-  const removeTech = (item: string) => {
-    setTechStack(techStack.filter((t) => t !== item));
-  };
-
-  // Feature Handlers
   const addFeature = () => {
-    if (!featureInput.trim()) return;
-    setFeatures([...features, featureInput.trim()]);
-    setFeatureInput("");
-  };
-
-  const removeFeature = (index: number) => {
-    setFeatures(features.filter((_, i) => i !== index));
-  };
-
-  const removeChallenge = (index: number) => {
-    setChallenges(challenges.filter((_, i) => i !== index));
+    if (featureInput.trim() && !features.includes(featureInput.trim())) {
+      setFeatures((prev) => [...prev, featureInput.trim()]);
+      setFeatureInput("");
+    }
   };
 
   const addChallenge = () => {
-    if (!challengeInput.trim()) return;
-    setChallenges([...challenges, challengeInput.trim()]);
-    setChallengeInput("");
-  };
-
-  const removeSolution = (index: number) => {
-    setSolutions(solutions.filter((_, i) => i !== index));
+    if (challengeInput.trim() && !challenges.includes(challengeInput.trim())) {
+      setChallenges((prev) => [...prev, challengeInput.trim()]);
+      setChallengeInput("");
+    }
   };
 
   const addSolution = () => {
-    if (!solutionInput.trim()) return;
-    setSolutions([...solutions, solutionInput.trim()]);
-    setSolutionInput("");
-  };
-
-  const removeLesson = (index: number) => {
-    setLessonsLearned(lessonsLearned.filter((_, i) => i !== index));
+    if (solutionInput.trim() && !solutions.includes(solutionInput.trim())) {
+      setSolutions((prev) => [...prev, solutionInput.trim()]);
+      setSolutionInput("");
+    }
   };
 
   const addLesson = () => {
-    if (!lessonInput.trim()) return;
-    setLessonsLearned([...lessonsLearned, lessonInput.trim()]);
-    setLessonInput("");
-  };
-
-  const removeFuture = (index: number) => {
-    setFutureImprovements(futureImprovements.filter((_, i) => i !== index));
+    if (lessonInput.trim() && !lessonsLearned.includes(lessonInput.trim())) {
+      setLessonsLearned((prev) => [...prev, lessonInput.trim()]);
+      setLessonInput("");
+    }
   };
 
   const addFuture = () => {
-    if (!futureInput.trim()) return;
-    setFutureImprovements([...futureImprovements, futureInput.trim()]);
-    setFutureInput("");
+    if (
+      futureInput.trim() &&
+      !futureImprovements.includes(futureInput.trim())
+    ) {
+      setFutureImprovements((prev) => [...prev, futureInput.trim()]);
+      setFutureInput("");
+    }
   };
 
+  const removeScreenshot = (index: number) => {
+    setScreenshots((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeTech = (item: string) => {
+    setTechStack((prev) => prev.filter((t) => t !== item));
+  };
+
+  const removeFeature = (index: number) => {
+    setFeatures((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeChallenge = (index: number) => {
+    setChallenges((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeSolution = (index: number) => {
+    setSolutions((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeLesson = (index: number) => {
+    setLessonsLearned((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeFuture = (index: number) => {
+    setFutureImprovements((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Form Submit Handler
   const handleSubmit = async (publishNow: boolean) => {
-    if (!title.trim() || !slug.trim() || !description.trim()) {
-      toast.error("Please fill in Title, Slug, and Short Summary.");
+    if (!title.trim() || !slug.trim() || !tagline.trim() || !description.trim()) {
+      toast.error("Please fill in Title, Slug, Tagline, and Short Description.");
       return;
     }
 
@@ -297,12 +307,9 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
     const payload: ProjectInput = {
       title,
       slug,
-      tagline: tagline || title,
+      tagline,
       description,
       fullDescription: fullDescription || description,
-      systemArchitecture: systemArchitecture || null,
-      classification: classification || null,
-      status: status || "Completed",
       categoryType,
       featured,
       published: publishNow,
@@ -320,13 +327,20 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       solutions,
       lessonsLearned,
       futureImprovements,
+      systemArchitecture: systemArchitecture || null,
+      status: status || "Completed",
+      classification: classification || "Personal Project",
     };
 
     try {
       if (initialData?.id) {
         const res = await updateProject(initialData.id, payload);
         if (res.success) {
-          toast.success("Project updated successfully!");
+          toast.success(
+            publishNow
+              ? "Project updated and published!"
+              : "Project updated as draft!"
+          );
           router.push("/private/projects");
         } else {
           toast.error(res.error || "Failed to update project.");
@@ -344,7 +358,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
           toast.error(res.error || "Failed to create project.");
         }
       }
-    } catch (error: any) {
+    } catch {
       toast.error("An error occurred while saving project.");
     } finally {
       setIsSubmitting(false);
@@ -442,7 +456,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
               </label>
               <select
                 value={categoryType}
-                onChange={(e) => setCategoryType(e.target.value as any)}
+                onChange={(e) => setCategoryType(e.target.value as "WEB_APP" | "MOBILE_APP" | "UI_UX" | "ACADEMIC" | "OTHER")}
                 className="w-full rounded-xl border border-border/80 bg-background/90 px-4 py-2.5 text-sm text-foreground focus:border-indigo-500 focus:outline-hidden transition-colors"
               >
                 <option value="WEB_APP">Web Applications</option>
@@ -757,9 +771,7 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
                     </p>
                     <button
                       type="button"
-                      onClick={() =>
-                        setScreenshots(screenshots.filter((_, i) => i !== idx))
-                      }
+                      onClick={() => removeScreenshot(idx)}
                       className="absolute top-3 right-3 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="h-3 w-3" />

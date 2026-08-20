@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Activity,
   BarChart3,
   BookOpen,
   ExternalLink,
@@ -49,7 +48,7 @@ export default function PrivateDashboardHome() {
     async function loadStats() {
       try {
         const data = await getDashboardMetrics();
-        setMetrics(data as any);
+        setMetrics(data as typeof metrics);
       } catch (err) {
         console.error("Dashboard stats error:", err);
       } finally {

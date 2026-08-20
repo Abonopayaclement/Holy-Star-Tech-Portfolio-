@@ -5,13 +5,11 @@ import { AdminLayout } from "@/components/private/AdminLayout";
 import { toast } from "sonner";
 import {
   Bell,
-  Check,
   Globe,
   KeyRound,
   Lock,
   Save,
   ShieldCheck,
-  Sparkles,
 } from "lucide-react";
 import { getProfileData, updateProfileData } from "@/actions/profile";
 
@@ -65,7 +63,7 @@ export default function PrivateSettingsPage() {
       } else {
         toast.error(res.error || "Failed to save settings.");
       }
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to save settings.");
     } finally {
       setLoading(false);

@@ -1,17 +1,5 @@
 import { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  ArrowLeft,
-  ArrowRight,
-  BookOpen,
-  Calendar,
-  Clock,
-  FolderGit2,
-  Share2,
-  Tag,
-  UserCheck,
-} from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { siteConfig } from "@/config/site";
 import { getProjects } from "@/actions/projects";
@@ -27,7 +15,7 @@ export async function generateMetadata({
   params,
 }: ArticleSlugPageProps): Promise<Metadata> {
   const resolvedParams = await params;
-  const post = await (prisma as any).blogPost.findUnique({
+  const post = await prisma.blogPost.findUnique({
     where: { slug: resolvedParams.slug },
   });
 
@@ -39,7 +27,7 @@ export async function generateMetadata({
   }
 
   const url = `${siteConfig.url}/blog/${post.slug}`;
-  const rawImages = (post as any).images;
+  const rawImages = post.images;
   const images = Array.isArray(rawImages) && rawImages.length > 0
     ? [(rawImages as string[])[0]]
     : ["/logo.png"];
@@ -72,7 +60,7 @@ export async function generateMetadata({
 
 export default async function ArticleDetailPage({ params }: ArticleSlugPageProps) {
   const resolvedParams = await params;
-  const post = await (prisma as any).blogPost.findUnique({
+  const post = await prisma.blogPost.findUnique({
     where: { slug: resolvedParams.slug },
   });
 
@@ -82,7 +70,7 @@ export default async function ArticleDetailPage({ params }: ArticleSlugPageProps
 
   // Related Articles & Projects
   const [allPosts, allProjects] = await Promise.all([
-    (prisma as any).blogPost.findMany({
+    prisma.blogPost.findMany({
       where: { published: true, id: { not: post.id } },
       take: 3,
       orderBy: { publishedAt: "desc" },
@@ -99,7 +87,7 @@ export default async function ArticleDetailPage({ params }: ArticleSlugPageProps
   });
 
   const fullUrl = `${siteConfig.url}/blog/${post.slug}`;
-  const rawImages = (post as any).images;
+  const rawImages = post.images;
   const heroImage = Array.isArray(rawImages) && rawImages.length > 0
     ? (rawImages as string[])[0]
     : null;
@@ -119,15 +107,24 @@ export default async function ArticleDetailPage({ params }: ArticleSlugPageProps
         heroImage,
         images: Array.isArray(rawImages) ? (rawImages as string[]) : [],
       }}
-      relatedPosts={allPosts.map((p: any) => ({
-        ...p,
+      relatedPosts={allPosts.map((p) => ({
+        id: p.id,
+        slug: p.slug,
+        title: p.title,
+        category: p.category,
         date: new Date(p.publishedAt || p.createdAt || Date.now()).toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
           year: "numeric",
         }),
       }))}
-      relatedProjects={relatedProjects}
+      relatedProjects={relatedProjects.map((p) => ({
+        id: p.id || p.slug,
+        slug: p.slug,
+        title: p.title,
+        categoryType: p.categoryType,
+        description: p.description,
+      }))}
     />
   );
 }

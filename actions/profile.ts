@@ -183,13 +183,17 @@ export async function updateResumeData(data: {
   }
 }
 
-// --------------------------------------------------------
-// SKILLS MANAGEMENT
-// --------------------------------------------------------
+export interface SkillItem {
+  id?: string;
+  name: string;
+  category: string;
+  proficiency?: number;
+  order?: number;
+}
 
-export async function getSkillsData() {
+export async function getSkillsData(): Promise<SkillItem[]> {
   try {
-    const skills = await (prisma as any).skill.findMany({
+    const skills = await prisma.skill.findMany({
       orderBy: { order: "asc" },
     });
 

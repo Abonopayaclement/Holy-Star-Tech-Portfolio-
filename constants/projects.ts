@@ -12,7 +12,7 @@ export interface DetailedProject {
   gradient: string;
   techStack: string[];
   features: string[];
-  screenshots: { title: string; subtitle: string; aspect: string }[];
+  screenshots: { title: string; subtitle: string; aspect: string; imagePath?: string }[];
   githubUrl?: string;
   liveUrl?: string;
   apkUrl?: string;
@@ -22,6 +22,9 @@ export interface DetailedProject {
   solutions: string[];
   lessonsLearned: string[];
   futureImprovements?: string[];
+  version?: string | null;
+  androidVersion?: string | null;
+  systemArchitecture?: string | null;
 }
 
 export const projectsData: DetailedProject[] = [

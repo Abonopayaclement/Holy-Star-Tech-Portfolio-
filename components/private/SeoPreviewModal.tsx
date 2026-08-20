@@ -2,12 +2,8 @@
 
 import React, { useState } from "react";
 import {
-  Globe,
   Search,
-  Share2,
   X,
-  Smartphone,
-  Laptop,
 } from "lucide-react";
 import { FaTwitter, FaFacebook } from "react-icons/fa";
 

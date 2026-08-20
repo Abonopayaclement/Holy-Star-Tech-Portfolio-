@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import {
   Check,
   Copy,
-  ExternalLink,
   Share2,
   X,
 } from "lucide-react";

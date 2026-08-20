@@ -77,10 +77,10 @@ export async function POST(request: Request) {
       fileType: fileCategory,
       size: file.size,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Upload handler error:", error);
     return NextResponse.json(
-      { success: false, error: error.message || "Failed to upload file." },
+      { success: false, error: error instanceof Error ? error.message : "Failed to upload file." },
       { status: 500 }
     );
   }

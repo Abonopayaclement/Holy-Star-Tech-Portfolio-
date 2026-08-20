@@ -3,12 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
-  BookOpen,
-  Calendar,
   Clock,
   Edit3,
   FileEdit,
-  Globe,
   ImageIcon,
   Plus,
   Send,
@@ -32,10 +29,10 @@ interface DraftPost {
   readTime: string;
   featured: boolean;
   published: boolean;
-  images?: any;
-  videos?: any;
-  createdAt: any;
-  updatedAt: any;
+  images?: unknown;
+  videos?: unknown;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export default function PrivateDraftsPage() {
@@ -48,7 +45,7 @@ export default function PrivateDraftsPage() {
     setLoading(true);
     try {
       const data = await getDraftBlogPosts();
-      setDrafts(data as any);
+      setDrafts(data as unknown as DraftPost[]);
     } catch (error) {
       console.error(error);
       toast.error("Failed to load drafts.");
@@ -70,7 +67,7 @@ export default function PrivateDraftsPage() {
       } else {
         toast.error(res.error || "Failed to publish post.");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to publish post.");
     }
   };
@@ -85,7 +82,7 @@ export default function PrivateDraftsPage() {
       } else {
         toast.error(res.error || "Failed to delete draft.");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete draft.");
     }
   };
@@ -148,7 +145,6 @@ export default function PrivateDraftsPage() {
           <div className="grid grid-cols-1 gap-6">
             {drafts.map((draft) => {
               const imageList = Array.isArray(draft.images) ? draft.images : [];
-              const videoList = Array.isArray(draft.videos) ? draft.videos : [];
               const formattedDate = new Date(draft.updatedAt).toLocaleDateString(
                 "en-US",
                 {
@@ -242,7 +238,22 @@ export default function PrivateDraftsPage() {
         isOpen={isEditorOpen}
         onClose={() => setIsEditorOpen(false)}
         onSuccess={fetchDrafts}
-        initialData={editingPost as any}
+        initialData={
+          editingPost
+            ? {
+                id: editingPost.id,
+                title: editingPost.title,
+                slug: editingPost.slug,
+                excerpt: editingPost.excerpt,
+                content: editingPost.content,
+                category: editingPost.category,
+                readTime: editingPost.readTime,
+                featured: editingPost.featured,
+                published: editingPost.published,
+                images: Array.isArray(editingPost.images) ? (editingPost.images as string[]) : [],
+              }
+            : undefined
+        }
       />
     </AdminLayout>
   );

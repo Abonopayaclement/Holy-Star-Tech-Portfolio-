@@ -4,10 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import {
   Activity,
-  CheckCircle2,
-  Clock,
   Hammer,
-  Image as ImageIcon,
   Loader2,
   Save,
   Upload,
@@ -16,6 +13,15 @@ import { AdminLayout } from "@/components/private/AdminLayout";
 import { getActiveWork, updateActiveWork } from "@/actions/active-work";
 import { getAdminCommentsForTarget, deleteComment } from "@/actions/engagement";
 import { Heart, MessageSquare, Trash2 } from "lucide-react";
+
+type ActiveProjectComment = {
+  id: string;
+  authorName: string;
+  content: string;
+  createdAt: string | Date;
+};
+
+type ActiveWorkStatus = "Planning" | "In Progress" | "Testing" | "Completed";
 
 export default function PrivateActiveProjectPage() {
   const [loading, setLoading] = useState(true);
@@ -26,17 +32,17 @@ export default function PrivateActiveProjectPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [progress, setProgress] = useState<number>(75);
-  const [status, setStatus] = useState<"Planning" | "In Progress" | "Testing" | "Completed">("In Progress");
+  const [status, setStatus] = useState<ActiveWorkStatus>("In Progress");
   const [image, setImage] = useState("");
 
   const [likesCount, setLikesCount] = useState(0);
-  const [commentsList, setCommentsList] = useState<any[]>([]);
+  const [commentsList, setCommentsList] = useState<ActiveProjectComment[]>([]);
 
   const loadEngagement = async () => {
     try {
       const stats = await getAdminCommentsForTarget("PROJECT", "active-work-item");
       setLikesCount(stats.likesCount);
-      setCommentsList(stats.comments);
+      setCommentsList(stats.comments as ActiveProjectComment[]);
     } catch (err) {
       console.error("Failed to load active work engagement stats:", err);
     }
@@ -51,11 +57,11 @@ export default function PrivateActiveProjectPage() {
           setTitle(data.title || "");
           setDescription(data.description || "");
           setProgress(data.progress || 75);
-          setStatus((data.status as any) || "In Progress");
+          setStatus((data.status as ActiveWorkStatus) || "In Progress");
           setImage(data.image || "");
         }
         await loadEngagement();
-      } catch (err) {
+      } catch {
         toast.error("Failed to load active project status.");
       } finally {
         setLoading(false);
@@ -93,7 +99,7 @@ export default function PrivateActiveProjectPage() {
       } else {
         toast.error(res.error || "Failed to update active project.");
       }
-    } catch (err) {
+    } catch {
       toast.error("Error saving active project.");
     } finally {
       setIsSaving(false);
@@ -121,7 +127,7 @@ export default function PrivateActiveProjectPage() {
       } else {
         toast.error("Upload failed.", { id: "img-upload" });
       }
-    } catch (err) {
+    } catch {
       toast.error("Error uploading image.", { id: "img-upload" });
     }
   };
@@ -136,7 +142,7 @@ export default function PrivateActiveProjectPage() {
               <Activity className="h-5 w-5 text-indigo-500" /> Active Project Tracker
             </h2>
             <p className="text-xs text-muted-foreground">
-              Manage the "Currently Working On" status card displayed on the public homepage.
+              Manage the &quot;Currently Working On&quot; status card displayed on the public homepage.
             </p>
           </div>
 
@@ -214,7 +220,7 @@ export default function PrivateActiveProjectPage() {
                 </label>
                 <select
                   value={status}
-                  onChange={(e) => setStatus(e.target.value as any)}
+                  onChange={(e) => setStatus(e.target.value as ActiveWorkStatus)}
                   className="w-full rounded-xl border border-border/80 bg-background px-4 py-2.5 text-sm text-foreground focus:border-indigo-500 focus:outline-hidden transition-colors"
                 >
                   <option value="Planning">Planning</option>

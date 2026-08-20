@@ -3,19 +3,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import {
-  Briefcase,
-  CheckCircle2,
   Code2,
   FileText,
-  Globe,
-  GraduationCap,
   Plus,
   Save,
   Share2,
-  Trash2,
   Upload,
   UserCheck,
-  Wrench,
   X,
   Loader2,
   Download,
@@ -32,6 +26,33 @@ import {
   getSocialLinksData,
   updateSocialLinksData,
 } from "@/actions/profile";
+
+type ResumeExperience = {
+  role?: string;
+  company?: string;
+  period?: string;
+  description?: string;
+};
+
+type ResumeEducation = {
+  degree?: string;
+  school?: string;
+  year?: string;
+};
+
+type ResumeCertification = {
+  name?: string;
+  issuer?: string;
+  year?: string;
+};
+
+type SkillItem = {
+  id: string;
+  name: string;
+  category: string;
+  proficiency?: number;
+  order?: number;
+};
 
 export default function PrivateProfilePage() {
   const [activeTab, setActiveTab] = useState<
@@ -51,15 +72,15 @@ export default function PrivateProfilePage() {
   // Resume Form State
   const [cvFileUrl, setCvFileUrl] = useState("");
   const [resumeSummary, setResumeSummary] = useState("");
-  const [experiences, setExperiences] = useState<any[]>([]);
-  const [educations, setEducations] = useState<any[]>([]);
-  const [certifications, setCertifications] = useState<any[]>([]);
+  const [experiences, setExperiences] = useState<ResumeExperience[]>([]);
+  const [educations, setEducations] = useState<ResumeEducation[]>([]);
+  const [certifications, setCertifications] = useState<ResumeCertification[]>([]);
 
   // Skills Form State
-  const [skills, setSkills] = useState<any[]>([]);
+  const [skills, setSkills] = useState<SkillItem[]>([]);
   const [newSkillName, setNewSkillName] = useState("");
   const [newSkillCategory, setNewSkillCategory] = useState("Frontend");
-  const [newSkillProficiency, setNewSkillProficiency] = useState(90);
+  const [newSkillProficiency] = useState(90);
 
   // Social Links Form State
   const [socialMap, setSocialMap] = useState<Record<string, string>>({
@@ -97,23 +118,23 @@ export default function PrivateProfilePage() {
           setCvFileUrl(resume.cvFileUrl || "");
           setResumeSummary(resume.summary || "");
           setExperiences(
-            Array.isArray(resume.experienceJson) ? resume.experienceJson : []
+            Array.isArray(resume.experienceJson) ? (resume.experienceJson as ResumeExperience[]) : []
           );
           setEducations(
-            Array.isArray(resume.educationJson) ? resume.educationJson : []
+            Array.isArray(resume.educationJson) ? (resume.educationJson as ResumeEducation[]) : []
           );
           setCertifications(
-            Array.isArray(resume.certsJson) ? resume.certsJson : []
+            Array.isArray(resume.certsJson) ? (resume.certsJson as ResumeCertification[]) : []
           );
         }
 
         if (skillsList) {
-          setSkills(skillsList);
+          setSkills(skillsList as SkillItem[]);
         }
 
         if (socials && Array.isArray(socials)) {
           const map: Record<string, string> = {};
-          socials.forEach((s: any) => {
+          socials.forEach((s: { platform: string; url: string }) => {
             map[s.platform.toLowerCase()] = s.url;
           });
           setSocialMap((prev) => ({ ...prev, ...map }));
@@ -147,7 +168,7 @@ export default function PrivateProfilePage() {
       } else {
         toast.error(res.error || "Failed to update profile.");
       }
-    } catch (err) {
+    } catch {
       toast.error("Error saving profile.");
     } finally {
       setIsSaving(false);
@@ -171,7 +192,7 @@ export default function PrivateProfilePage() {
       } else {
         toast.error(res.error || "Failed to update resume.");
       }
-    } catch (err) {
+    } catch {
       toast.error("Error saving resume.");
     } finally {
       setIsSaving(false);
@@ -205,7 +226,7 @@ export default function PrivateProfilePage() {
       } else {
         toast.error("Failed to upload CV file.", { id: "cv-upload" });
       }
-    } catch (err) {
+    } catch {
       toast.error("CV upload failed.", { id: "cv-upload" });
     }
   };
@@ -226,13 +247,13 @@ export default function PrivateProfilePage() {
       });
 
       if (res.success && res.skill) {
-        setSkills((prev) => [...prev, res.skill]);
+        setSkills((prev) => [...prev, res.skill as SkillItem]);
         setNewSkillName("");
         toast.success(`Skill "${newSkillName}" added!`);
       } else {
         toast.error(res.error || "Failed to add skill.");
       }
-    } catch (err) {
+    } catch {
       toast.error("Error adding skill.");
     }
   };
@@ -247,7 +268,7 @@ export default function PrivateProfilePage() {
       } else {
         toast.error(res.error || "Failed to delete skill.");
       }
-    } catch (err) {
+    } catch {
       toast.error("Error deleting skill.");
     }
   };
@@ -262,7 +283,7 @@ export default function PrivateProfilePage() {
       } else {
         toast.error(res.error || "Failed to update social links.");
       }
-    } catch (err) {
+    } catch {
       toast.error("Error saving social links.");
     } finally {
       setIsSaving(false);

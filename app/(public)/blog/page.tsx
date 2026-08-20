@@ -4,22 +4,15 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  ArrowUpRight,
   BookOpen,
-  Calendar,
   ChevronLeft,
   ChevronRight,
-  Clock,
   Heart,
-  ImageIcon,
   MessageSquare,
   Search,
-  Sparkles,
-  Tag,
 } from "lucide-react";
-import { SectionHeader } from "@/components/shared/SectionHeader";
 import { PageHeaderBanner } from "@/components/shared/PageHeaderBanner";
-import { getBlogPosts } from "@/actions/blog";
+import { getBlogPosts, BlogPostRecord } from "@/actions/blog";
 import { QuickCommentModal } from "@/components/public/QuickCommentModal";
 import { getPublicEngagement, toggleLike } from "@/actions/engagement";
 
@@ -105,12 +98,12 @@ export default function BlogPage() {
       try {
         const posts = await getBlogPosts();
         if (posts && posts.length > 0) {
-          const mapped: Article[] = (posts as any[]).map((p) => ({
-            id: p.id,
+          const mapped: Article[] = posts.map((p: BlogPostRecord) => ({
+            id: p.id || p.slug,
             slug: p.slug,
             title: p.title,
             excerpt: p.excerpt,
-            date: new Date(p.publishedAt || p.createdAt).toLocaleDateString("en-US", {
+            date: new Date(p.publishedAt || p.createdAt || Date.now()).toLocaleDateString("en-US", {
               month: "long",
               day: "numeric",
               year: "numeric",
@@ -118,7 +111,7 @@ export default function BlogPage() {
             readTime: p.readTime || "3 min read",
             category: p.category || "Development",
             featured: p.featured,
-            images: Array.isArray(p.images) ? p.images : [],
+            images: Array.isArray(p.images) ? (p.images as string[]) : [],
           }));
           setDbArticles(mapped);
         }

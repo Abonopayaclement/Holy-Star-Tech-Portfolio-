@@ -181,7 +181,7 @@ export function QuickCommentModal({
                           <span>Admin Reply</span>
                         </div>
                         <p className="text-foreground leading-relaxed text-xs">
-                          "{review.adminReply}"
+                          &ldquo;{review.adminReply}&rdquo;
                         </p>
                       </div>
                     )}

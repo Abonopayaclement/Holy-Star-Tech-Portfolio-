@@ -6,13 +6,10 @@ import { toast } from "sonner";
 import {
   Download,
   Edit3,
-  ExternalLink,
-  Eye,
   EyeOff,
   FolderGit2,
   Plus,
   Send,
-  Sparkles,
   Trash2,
 } from "lucide-react";
 import { AdminLayout } from "@/components/private/AdminLayout";
@@ -33,10 +30,10 @@ interface ProjectItem {
   categoryType: string;
   featured: boolean;
   published: boolean;
-  techStack: any;
+  techStack: unknown;
   apkUrl?: string | null;
   version?: string | null;
-  updatedAt: any;
+  updatedAt: string | Date;
 }
 
 export default function PrivateProjectsPage() {
@@ -51,7 +48,7 @@ export default function PrivateProjectsPage() {
     setLoading(true);
     try {
       const data = await getAllProjectsAdmin();
-      setProjects(data as any);
+      setProjects(data as unknown as ProjectItem[]);
       const engagement = await getDashboardEngagementSummary();
       setEngagementSummary(engagement.projectStats);
     } catch (error) {
@@ -83,7 +80,7 @@ export default function PrivateProjectsPage() {
       } else {
         toast.error(res.error || "Failed to update project status.");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to update status.");
     }
   };
@@ -98,7 +95,7 @@ export default function PrivateProjectsPage() {
       } else {
         toast.error(res.error || "Failed to delete project.");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete project.");
     }
   };

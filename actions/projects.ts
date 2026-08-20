@@ -7,6 +7,7 @@ import { requireAdminSession } from "@/lib/auth-guard";
 import { projectsData } from "@/constants/projects";
 
 const projectSchema = z.object({
+  id: z.string().optional(),
   title: z.string().min(2, "Title is required."),
   slug: z.string().min(2, "Slug is required."),
   tagline: z.string().min(5, "Tagline is required."),
@@ -96,18 +97,30 @@ async function seedDefaultProjectsIfEmpty() {
   }
 }
 
-export async function getProjects() {
+export async function getProjects(): Promise<ProjectInput[]> {
   try {
     await seedDefaultProjectsIfEmpty();
     const list = await prisma.project.findMany({
-      where: { published: true } as any,
+      where: { published: true },
       orderBy: { createdAt: "asc" },
     });
-    if (list.length > 0) return list;
-    return projectsData as any;
+    if (list.length > 0) return list as unknown as ProjectInput[];
+    return projectsData.map((p) => ({
+      ...p,
+      published: true,
+      featured: p.featured ?? false,
+      categoryType: p.categoryType as "WEB_APP" | "MOBILE_APP" | "UI_UX" | "ACADEMIC" | "OTHER",
+      gradient: p.gradient || "from-amber-500/20 via-indigo-600/20 to-cyan-500/20",
+    })) as ProjectInput[];
   } catch (error) {
     console.error("Failed to fetch published projects:", error);
-    return projectsData as any;
+    return projectsData.map((p) => ({
+      ...p,
+      published: true,
+      featured: p.featured ?? false,
+      categoryType: p.categoryType as "WEB_APP" | "MOBILE_APP" | "UI_UX" | "ACADEMIC" | "OTHER",
+      gradient: p.gradient || "from-amber-500/20 via-indigo-600/20 to-cyan-500/20",
+    })) as ProjectInput[];
   }
 }
 

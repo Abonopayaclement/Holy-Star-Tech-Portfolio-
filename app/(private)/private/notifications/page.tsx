@@ -6,12 +6,10 @@ import { toast } from "sonner";
 import {
   Bell,
   CheckCheck,
-  Clock,
   Heart,
   Mail,
   MessageSquare,
   RefreshCw,
-  Sparkles,
   Trash2,
   ExternalLink,
   CheckCircle2,
@@ -28,21 +26,23 @@ import {
 
 type NotificationFilter = "ALL" | "UNREAD" | "READ";
 
+type NotificationsData = {
+  totalCount: number;
+  unreadCount: number;
+  readCount: number;
+  notifications: {
+    id: string;
+    title: string;
+    message: string;
+    type: "COMMENT" | "LIKE" | "CONTACT" | "SYSTEM" | string;
+    targetUrl: string;
+    isRead: boolean;
+    createdAt: string;
+  }[];
+};
+
 export default function PrivateNotificationsPage() {
-  const [data, setData] = useState<{
-    totalCount: number;
-    unreadCount: number;
-    readCount: number;
-    notifications: {
-      id: string;
-      title: string;
-      message: string;
-      type: "COMMENT" | "LIKE" | "CONTACT" | "SYSTEM" | string;
-      targetUrl: string;
-      isRead: boolean;
-      createdAt: string;
-    }[];
-  }>({
+  const [data, setData] = useState<NotificationsData>({
     totalCount: 0,
     unreadCount: 0,
     readCount: 0,
@@ -56,7 +56,7 @@ export default function PrivateNotificationsPage() {
     setLoading(true);
     try {
       const res = await getAllNotificationsAdmin(filter);
-      setData(res as any);
+      setData(res as unknown as NotificationsData);
     } catch (err) {
       console.error("Failed to load notifications:", err);
       toast.error("Failed to fetch notifications.");

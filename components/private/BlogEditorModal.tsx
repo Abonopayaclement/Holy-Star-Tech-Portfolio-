@@ -13,8 +13,6 @@ import {
   Quote,
   Code,
   Link as LinkIcon,
-  Image as ImageIcon,
-  Video as VideoIcon,
   X,
   Upload,
   Eye,
@@ -71,7 +69,7 @@ export function BlogEditorModal({
   const [seoModalOpen, setSeoModalOpen] = useState(false);
   const [promoKitOpen, setPromoKitOpen] = useState(false);
 
-  const [commentsList, setCommentsList] = useState<any[]>([]);
+  const [commentsList, setCommentsList] = useState<Array<{ id: string; authorName: string; content: string; createdAt: string | Date; published?: boolean }>>([]);
   const [likesCount, setLikesCount] = useState(0);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -178,25 +176,27 @@ export function BlogEditorModal({
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const toastId = toast.loading("Uploading file...", { id: "upload-status" });
     setIsUploading(true);
-    const toastId = toast.loading("Uploading selected media file...");
 
     try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const formData = new FormData();
-        formData.append("file", file);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
 
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
+      if (!data.success || !data.url) {
+        throw new Error(data.error || "Failed to upload file.");
+      }
 
-        const data = await res.json();
-        if (!res.ok || !data.success) {
-          throw new Error(data.error || "Upload failed");
-        }
-
+      if (data.url) {
         if (data.fileType === "image") {
           setImages((prev: string[]) => [...prev, data.url]);
           // Append image markdown snippet to content
@@ -209,19 +209,15 @@ export function BlogEditorModal({
       }
 
       toast.success("File uploaded and attached to article successfully!", { id: toastId });
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || "Failed to upload file.", { id: toastId });
+      toast.error(err instanceof Error ? err.message : "Failed to upload file.", { id: toastId });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     }
-  };
-
-  const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Submit Handler: publishNow boolean differentiates "Save as Draft" vs "Publish"
@@ -272,7 +268,7 @@ export function BlogEditorModal({
           toast.error(res.error || "Failed to create article.");
         }
       }
-    } catch (error: any) {
+    } catch {
       toast.error("An error occurred while saving post.");
     } finally {
       setIsSubmitting(false);

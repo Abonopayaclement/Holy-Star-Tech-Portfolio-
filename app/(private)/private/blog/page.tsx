@@ -4,11 +4,8 @@ import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   BookOpen,
-  Calendar,
   Clock,
   Edit3,
-  FileEdit,
-  Eye,
   EyeOff,
   ImageIcon,
   Plus,
@@ -35,10 +32,10 @@ interface BlogPostItem {
   readTime: string;
   featured: boolean;
   published: boolean;
-  images?: any;
-  videos?: any;
-  createdAt: any;
-  updatedAt: any;
+  images?: unknown;
+  videos?: unknown;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 export default function PrivateBlogPage() {
@@ -55,7 +52,7 @@ export default function PrivateBlogPage() {
     setLoading(true);
     try {
       const data = await getAllBlogPostsAdmin();
-      setPosts(data as any);
+      setPosts(data as unknown as BlogPostItem[]);
       const engagement = await getDashboardEngagementSummary();
       setEngagementSummary(engagement.blogStats);
     } catch (error) {
@@ -83,7 +80,7 @@ export default function PrivateBlogPage() {
       } else {
         toast.error(res.error || "Failed to update publish status.");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to update publish status.");
     }
   };
@@ -98,7 +95,7 @@ export default function PrivateBlogPage() {
       } else {
         toast.error(res.error || "Failed to delete blog post.");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete blog post.");
     }
   };
@@ -213,7 +210,6 @@ export default function PrivateBlogPage() {
           <div className="grid grid-cols-1 gap-6">
             {filteredPosts.map((post) => {
               const imageList = Array.isArray(post.images) ? post.images : [];
-              const videoList = Array.isArray(post.videos) ? post.videos : [];
               const formattedDate = new Date(post.updatedAt).toLocaleDateString(
                 "en-US",
                 {
@@ -344,7 +340,22 @@ export default function PrivateBlogPage() {
         isOpen={isEditorOpen}
         onClose={() => setIsEditorOpen(false)}
         onSuccess={fetchPosts}
-        initialData={editingPost as any}
+        initialData={
+          editingPost
+            ? {
+                id: editingPost.id,
+                title: editingPost.title,
+                slug: editingPost.slug,
+                excerpt: editingPost.excerpt,
+                content: editingPost.content,
+                category: editingPost.category,
+                readTime: editingPost.readTime,
+                featured: editingPost.featured,
+                published: editingPost.published,
+                images: Array.isArray(editingPost.images) ? (editingPost.images as string[]) : [],
+              }
+            : undefined
+        }
       />
     </AdminLayout>
   );

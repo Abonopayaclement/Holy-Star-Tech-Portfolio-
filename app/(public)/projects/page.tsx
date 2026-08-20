@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  ArrowUpRight,
   ChevronLeft,
   ChevronRight,
   Download,
@@ -14,9 +13,7 @@ import {
   Heart,
   MessageSquare,
   Search,
-  Sparkles,
 } from "lucide-react";
-import { SectionHeader } from "@/components/shared/SectionHeader";
 import { PageHeaderBanner } from "@/components/shared/PageHeaderBanner";
 import { projectsData } from "@/constants/projects";
 import { getProjects } from "@/actions/projects";
@@ -71,24 +68,24 @@ export default function ProjectsPage() {
             WEB_APP: "Web Applications",
           };
 
-          const mapped: DisplayProject[] = data.map((p: any) => {
+          const mapped: DisplayProject[] = data.map((p) => {
             const catName = categoryNames[p.categoryType] || "Web Applications";
 
             return {
-              id: p.id,
+              id: p.id || p.slug,
               slug: p.slug,
               title: p.title,
               description: p.description,
               category: catName,
               categoryType: p.categoryType,
               featured: p.featured,
-              featuredImage: (p as any).featuredImage,
+              featuredImage: p.featuredImage,
               gradient: p.gradient || "from-amber-500/20 via-indigo-600/20 to-cyan-500/20",
               techStack: Array.isArray(p.techStack) ? (p.techStack as string[]) : [],
               githubUrl: p.githubUrl,
               liveUrl: p.liveUrl,
               apkUrl: p.apkUrl,
-              status: (p as any).status || "Completed",
+              status: p.status || "Completed",
             };
           });
           setDbProjects(mapped);
@@ -100,7 +97,24 @@ export default function ProjectsPage() {
     loadDbProjects();
   }, []);
 
-  const allProjects = dbProjects.length > 0 ? dbProjects : (projectsData as any);
+  const allProjects: DisplayProject[] = dbProjects.length > 0
+    ? dbProjects
+    : projectsData.map((p) => ({
+        id: p.id,
+        slug: p.slug,
+        title: p.title,
+        description: p.description,
+        category: p.category,
+        categoryType: p.categoryType,
+        status: p.status,
+        featured: p.featured,
+        featuredImage: p.featuredImage,
+        gradient: p.gradient,
+        techStack: p.techStack,
+        githubUrl: p.githubUrl,
+        liveUrl: p.liveUrl,
+        apkUrl: p.apkUrl,
+      }));
 
   // Filter projects by Search Query & Category
   const filteredProjects = allProjects.filter((p: DisplayProject) => {

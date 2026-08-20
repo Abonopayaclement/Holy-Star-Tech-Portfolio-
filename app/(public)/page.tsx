@@ -9,29 +9,26 @@ import {
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { PageHeaderBanner } from "@/components/shared/PageHeaderBanner";
 import { HomeHeroSlider } from "@/components/public/HomeHeroSlider";
-import { siteConfig } from "@/config/site";
-import { getProjects } from "@/actions/projects";
-import { getBlogPosts } from "@/actions/blog";
-import { getSkillsData, getProfileData, getResumeData } from "@/actions/profile";
+import { getProjects, ProjectInput } from "@/actions/projects";
+import { getBlogPosts, BlogPostRecord } from "@/actions/blog";
+import { getSkillsData, SkillItem } from "@/actions/profile";
 import { CardEngagement } from "@/components/public/CardEngagement";
 
 export default async function HomePage() {
-  const [projects, posts, skills, profile, resume] = await Promise.all([
+  const [projects, posts, skills] = await Promise.all([
     getProjects(),
     getBlogPosts(),
     getSkillsData(),
-    getProfileData(),
-    getResumeData(),
   ]);
 
   // Featured projects on homepage: Hotel Management System, COMPSSA Management System & Smart Data Usage
-  const featuredProjects = projects.filter((p: any) => p.featured).slice(0, 3);
+  const featuredProjects = projects.filter((p: ProjectInput) => p.featured).slice(0, 3);
   const displayProjects = featuredProjects.length > 0 ? featuredProjects : projects.slice(0, 3);
   const latestArticles = posts.slice(0, 3);
 
   // Group Skills by category
   const skillCategoriesMap: Record<string, string[]> = {};
-  skills.forEach((s: any) => {
+  skills.forEach((s: SkillItem) => {
     const cat = s.category || "General";
     if (!skillCategoriesMap[cat]) skillCategoriesMap[cat] = [];
     skillCategoriesMap[cat].push(s.name);
@@ -59,14 +56,14 @@ export default async function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
-            {displayProjects.map((project: any) => {
+            {displayProjects.map((project: ProjectInput) => {
               const techList = Array.isArray(project.techStack)
-                ? project.techStack
+                ? (project.techStack as string[])
                 : [];
 
               return (
                 <div
-                  key={project.id}
+                  key={project.id || project.slug}
                   className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/80 bg-card text-card-foreground p-6 shadow-md transition-all duration-300 hover:border-indigo-500/40 hover:shadow-xl"
                 >
                   <div className="space-y-4">
@@ -176,18 +173,18 @@ export default async function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {latestArticles.map((post: any) => {
-              const formattedDate = new Date(post.publishedAt || post.updatedAt).toLocaleDateString(
+            {latestArticles.map((post: BlogPostRecord) => {
+              const formattedDate = new Date(post.publishedAt || post.updatedAt || Date.now()).toLocaleDateString(
                 "en-US",
                 { month: "short", day: "numeric", year: "numeric" }
               );
               const cardImage = Array.isArray(post.images) && post.images.length > 0
-                ? post.images[0]
+                ? (post.images as string[])[0]
                 : "/logo.png";
 
               return (
                 <div
-                  key={post.id}
+                  key={post.id || post.slug}
                   className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/80 bg-card text-card-foreground p-6 shadow-md transition-all duration-300 hover:border-indigo-500/40 hover:shadow-xl"
                 >
                   <div className="space-y-4">

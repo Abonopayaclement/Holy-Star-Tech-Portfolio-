@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, CheckCircle2, Code2, FolderGit2, Hammer, Sparkles, Smartphone, Terminal } from "lucide-react";
+import { ArrowRight, Code2, Hammer, Smartphone, Terminal } from "lucide-react";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { siteConfig } from "@/config/site";
 import { getActiveWork } from "@/actions/active-work";

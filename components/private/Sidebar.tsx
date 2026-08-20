@@ -7,15 +7,12 @@ import {
   Activity,
   Bell,
   BookOpen,
-  FileEdit,
-  FileText,
   FolderGit2,
   HeartHandshake,
   LayoutDashboard,
   LogOut,
   Mail,
   Settings,
-  ShieldCheck,
   UserCheck,
   Users,
 } from "lucide-react";
@@ -29,7 +26,7 @@ import { signOutAdmin } from "@/actions/admin-auth";
 export interface AdminNavItem {
   title: string;
   href: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   badge?: string;
 }
 

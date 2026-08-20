@@ -8,7 +8,6 @@ import {
   Mail,
   Smartphone,
   Terminal,
-  Users,
   Wrench,
 } from "lucide-react";
 import { SectionHeader } from "@/components/shared/SectionHeader";

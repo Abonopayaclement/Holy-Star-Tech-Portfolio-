@@ -7,15 +7,28 @@ import {
   ArrowRight,
   BookOpen,
   Calendar,
-  Clock,
   FolderGit2,
   Share2,
-  Sparkles,
-  UserCheck,
 } from "lucide-react";
 import { PromotionKitModal } from "@/components/shared/PromotionKitModal";
 import { EngagementSection } from "@/components/public/EngagementSection";
 import { siteConfig } from "@/config/site";
+
+export interface RelatedPost {
+  id: string;
+  slug: string;
+  title: string;
+  category?: string;
+  date?: string;
+}
+
+export interface RelatedProject {
+  id?: string;
+  slug: string;
+  title: string;
+  categoryType: string;
+  description: string;
+}
 
 interface ArticleDetailClientProps {
   post: {
@@ -31,8 +44,8 @@ interface ArticleDetailClientProps {
     heroImage: string | null;
     images: string[];
   };
-  relatedPosts: any[];
-  relatedProjects: any[];
+  relatedPosts: RelatedPost[];
+  relatedProjects: RelatedProject[];
 }
 
 export function ArticleDetailClient({
@@ -206,7 +219,7 @@ export function ArticleDetailClient({
               </div>
 
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {relatedPosts.map((rel: any) => (
+                {relatedPosts.map((rel) => (
                   <Link
                     key={rel.id}
                     href={`/blog/${rel.slug}`}
@@ -242,7 +255,7 @@ export function ArticleDetailClient({
               </div>
 
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                {relatedProjects.map((proj: any) => (
+                {relatedProjects.map((proj) => (
                   <Link
                     key={proj.id}
                     href={`/projects/${proj.slug}`}

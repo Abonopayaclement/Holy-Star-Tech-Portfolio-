@@ -21,7 +21,7 @@ export async function GET() {
     }
 
     return NextResponse.json({ success: true, message: "HST Logo copied to public/logo.png and public/favicon.ico!" });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "Failed to copy logo." }, { status: 500 });
   }
 }

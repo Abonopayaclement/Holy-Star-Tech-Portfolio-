@@ -3,18 +3,13 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
-  CheckCheck,
-  Clock,
-  Filter,
   Inbox,
   Mail,
   MailOpen,
-  MessageSquare,
   Reply,
   Search,
   Trash2,
   User,
-  X,
 } from "lucide-react";
 import { AdminLayout } from "@/components/private/AdminLayout";
 import {
@@ -72,7 +67,7 @@ export default function PrivateMessagesPage() {
         }
         toast.success("Message marked as read.");
       }
-    } catch (err) {
+    } catch {
       toast.error("Failed to update message status.");
     }
   };
@@ -87,7 +82,7 @@ export default function PrivateMessagesPage() {
         }
         toast.success("Message deleted.");
       }
-    } catch (err) {
+    } catch {
       toast.error("Failed to delete message.");
     }
   };
@@ -101,7 +96,7 @@ export default function PrivateMessagesPage() {
           setSelectedMessage(null);
           toast.success("All inbox messages cleared!");
         }
-      } catch (err) {
+      } catch {
         toast.error("Failed to clear messages.");
       }
     }

@@ -3,13 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
-  Activity,
-  ArrowUpRight,
-  BarChart3,
   Calendar,
   Clock,
-  Compass,
-  Download,
   Eye,
   Globe,
   Laptop,
@@ -80,7 +75,7 @@ export default function VisitorsAnalyticsPage() {
         await clearVisitorLogs();
         toast.success("Visitor logs cleared. Analytics reset to 0!");
         await loadData();
-      } catch (e) {
+      } catch {
         toast.error("Failed to clear logs.");
         setLoading(false);
       }
@@ -174,7 +169,7 @@ export default function VisitorsAnalyticsPage() {
           {/* Today's Visitors */}
           <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Today's Visits</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Today&apos;s Visits</span>
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
                 <Clock className="h-5 w-5" />
               </div>

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/private/AdminLayout";
 import { toast } from "sonner";
-import { Download, FileText, Upload, CheckCircle2, RefreshCw } from "lucide-react";
+import { Download, FileText, Upload, CheckCircle2 } from "lucide-react";
 import { getResumeData, updateResumeData } from "@/actions/profile";
 
 export default function PrivateResumePage() {
@@ -46,7 +46,7 @@ export default function PrivateResumePage() {
       } else {
         toast.error(data.error || "Uploading failed.");
       }
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to upload CV file.");
     } finally {
       setUploading(false);

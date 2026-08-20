@@ -6,7 +6,6 @@ import {
   BookOpen,
   CheckCircle2,
   Clock,
-  Eye,
   EyeOff,
   Filter,
   FolderGit2,
@@ -37,45 +36,47 @@ type TargetTab = "BLOG" | "PROJECT";
 type PrimaryFilter = "ALL" | "LIKES" | "COMMENTS";
 type CommentSubFilter = "ALL" | "PUBLISHED" | "PENDING" | "REPLIED" | "NOT_REPLIED";
 
+type EngagementData = {
+  summary: {
+    totalLikes: number;
+    totalComments: number;
+    publishedCommentsCount: number;
+    pendingCommentsCount: number;
+  };
+  projects: {
+    id: string;
+    title: string;
+    slug: string;
+    likes: number;
+    totalComments: number;
+    publishedComments: number;
+    pendingComments: number;
+  }[];
+  blogPosts: {
+    id: string;
+    title: string;
+    slug: string;
+    likes: number;
+    totalComments: number;
+    publishedComments: number;
+    pendingComments: number;
+  }[];
+  comments: {
+    id: string;
+    targetType: "BLOG" | "PROJECT";
+    authorName: string;
+    content: string;
+    published: boolean;
+    adminReply?: string | null;
+    adminReplyPublished?: boolean;
+    createdAt: string;
+    itemTitle: string;
+    itemSlug: string;
+  }[];
+};
+
 export default function PrivateEngagementPage() {
-  const [data, setData] = useState<{
-    summary: {
-      totalLikes: number;
-      totalComments: number;
-      publishedCommentsCount: number;
-      pendingCommentsCount: number;
-    };
-    projects: {
-      id: string;
-      title: string;
-      slug: string;
-      likes: number;
-      totalComments: number;
-      publishedComments: number;
-      pendingComments: number;
-    }[];
-    blogPosts: {
-      id: string;
-      title: string;
-      slug: string;
-      likes: number;
-      totalComments: number;
-      publishedComments: number;
-      pendingComments: number;
-    }[];
-    comments: {
-      id: string;
-      targetType: "BLOG" | "PROJECT";
-      authorName: string;
-      content: string;
-      published: boolean;
-      adminReply?: string | null;
-      adminReplyPublished?: boolean;
-      createdAt: string;
-      itemTitle: string;
-      itemSlug: string;
-    }[];
-  }>({
+  const [data, setData] = useState<EngagementData>({
     summary: {
       totalLikes: 0,
       totalComments: 0,
@@ -110,7 +111,7 @@ export default function PrivateEngagementPage() {
     setLoading(true);
     try {
       const res = await getAllEngagementAdmin();
-      setData(res as any);
+      setData(res as unknown as EngagementData);
     } catch (error) {
       console.error("Failed to load engagement data:", error);
       toast.error("Failed to load engagement metrics.");
@@ -130,7 +131,7 @@ export default function PrivateEngagementPage() {
         await clearAllLikesAndComments();
         toast.success("All likes, comments, and engagement reset to 0!");
         await loadData();
-      } catch (err) {
+      } catch {
         toast.error("Failed to reset engagement.");
         setLoading(false);
       }
@@ -171,7 +172,7 @@ export default function PrivateEngagementPage() {
     }
   };
 
-  const openReplyEditor = (c: any) => {
+  const openReplyEditor = (c: EngagementData["comments"][number]) => {
     setReplyingCommentId(c.id);
     setReplyText(c.adminReply || "");
     setPublishReplyToggle(c.adminReplyPublished !== false);

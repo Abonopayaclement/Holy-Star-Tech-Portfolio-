@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   Award,
   Briefcase,
@@ -6,10 +5,8 @@ import {
   Download,
   FileText,
   GraduationCap,
-  Sparkles,
   Terminal,
 } from "lucide-react";
-import { SectionHeader } from "@/components/shared/SectionHeader";
 import { PageHeaderBanner } from "@/components/shared/PageHeaderBanner";
 import { siteConfig } from "@/config/site";
 import { getResumeData } from "@/actions/profile";

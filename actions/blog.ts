@@ -19,7 +19,23 @@ const blogPostSchema = z.object({
 
 export type BlogPostInput = z.infer<typeof blogPostSchema>;
 
-const defaultArticles = [
+export interface BlogPostRecord {
+  id?: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content?: string;
+  category: string;
+  readTime: string;
+  featured?: boolean;
+  published?: boolean;
+  publishedAt?: Date | string | null;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  images?: string[] | unknown;
+}
+
+const defaultArticles: BlogPostRecord[] = [
   {
     slug: "my-journey-into-software-engineering",
     title: "My Journey into Software Engineering",
@@ -52,7 +68,7 @@ const defaultArticles = [
     excerpt:
       "How I built a digital student management portal for Computer Science student association records, course document distribution, and departmental announcements.",
     content:
-      "Developing the COMPSSA Management System involved analyzing association workflow procedures. Using JavaScript, React, Node.js, Express.js, and MySQL, I implemented role-based middleware to distinguish student executive controls from regular member access while providing centralized document downloads.",
+      "The COMPSSA Management System is a comprehensive web portal designed for the Computer Science Students Association at Kumasi Technical University. It streamlines student record tracking, executive announcements, and access to academic materials.",
     category: "Web Development",
     readTime: "3 min read",
     featured: true,
@@ -65,7 +81,7 @@ const defaultArticles = [
     excerpt:
       "Insights and practical takeaways from transitioning from vanilla JavaScript into component-driven React interfaces and Next.js App Router applications.",
     content:
-      "Transitioning from vanilla JavaScript into component-driven React development opens up modular UI architecture. Learning JSX syntax, state hooks, and Next.js server actions allows building fast, dynamic web applications with clean code structure.",
+      "Moving from standard DOM manipulation to React's declarative state model fundamentally improved how I construct user interfaces. Combining server components with client-side interactivity in Next.js provides unmatched performance and developer experience.",
     category: "Web Development",
     readTime: "3 min read",
     featured: false,
@@ -92,18 +108,18 @@ async function seedDefaultBlogsIfEmpty() {
     const count = await prisma.blogPost.count();
     if (count === 0) {
       for (const a of defaultArticles) {
-        await (prisma.blogPost as any).create({
+        await prisma.blogPost.create({
           data: {
             title: a.title,
             slug: a.slug,
             excerpt: a.excerpt,
-            content: a.content,
+            content: a.content || "",
             category: a.category,
             readTime: a.readTime,
-            featured: a.featured,
-            published: a.published,
+            featured: a.featured || false,
+            published: a.published || false,
             publishedAt: new Date(),
-            images: a.images,
+            images: Array.isArray(a.images) ? a.images : [],
           },
         });
       }
@@ -113,18 +129,18 @@ async function seedDefaultBlogsIfEmpty() {
   }
 }
 
-export async function getBlogPosts() {
+export async function getBlogPosts(): Promise<BlogPostRecord[]> {
   try {
     await seedDefaultBlogsIfEmpty();
     const list = await prisma.blogPost.findMany({
       where: { published: true },
       orderBy: { publishedAt: "desc" },
     });
-    if (list.length > 0) return list;
-    return defaultArticles as any;
+    if (list.length > 0) return list as unknown as BlogPostRecord[];
+    return defaultArticles;
   } catch (error) {
     console.error("Failed to fetch blog posts:", error);
-    return defaultArticles as any;
+    return defaultArticles;
   }
 }
 
