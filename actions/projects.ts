@@ -228,27 +228,78 @@ async function ensureProjectColumnsAreLongText() {
   }
 }
 
+async function extractAndStoreDataUrls(rawText: string | null | undefined): Promise<string | null> {
+  if (!rawText || !rawText.includes("data:image/")) return rawText || null;
+
+  let text = rawText;
+  const dataUrlRegex = /data:(image\/[a-zA-Z0-9+.-]+);base64,([A-Za-z0-9+/=\r\n]+)/g;
+  const matches = [...text.matchAll(dataUrlRegex)];
+
+  for (const match of matches) {
+    const fullDataUrl = match[0];
+    const mimeType = match[1];
+    const base64Data = match[2].replace(/\s/g, "");
+
+    const ext = mimeType.includes("png") ? ".png" : mimeType.includes("webp") ? ".webp" : ".jpg";
+    const assetId = `media_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+    try {
+      await prisma.$executeRawUnsafe(
+        "INSERT INTO `media_asset` (`id`, `filename`, `mimeType`, `size`, `data`, `createdAt`, `updatedAt`) VALUES (?, ?, ?, ?, ?, NOW(3), NOW(3))",
+        assetId,
+        `image${ext}`,
+        mimeType,
+        Math.round((base64Data.length * 3) / 4),
+        base64Data
+      );
+
+      text = text.split(fullDataUrl).join(`/api/media/${assetId}${ext}`);
+    } catch (e) {
+      console.warn("Failed to extract project data URL:", e);
+    }
+  }
+
+  return text;
+}
+
 export async function createProject(input: ProjectInput) {
   try {
     await requireAdminSession();
     await ensureProjectColumnsAreLongText();
     const validated = projectSchema.parse(input);
 
+    const cleanDescription = (await extractAndStoreDataUrls(validated.description)) || validated.description;
+    const cleanFullDescription = (await extractAndStoreDataUrls(validated.fullDescription)) || validated.fullDescription;
+    const cleanTagline = (await extractAndStoreDataUrls(validated.tagline)) || validated.tagline;
+    const cleanArch = await extractAndStoreDataUrls(validated.systemArchitecture);
+    const cleanFeaturedImage = await extractAndStoreDataUrls(validated.featuredImage);
+
+    // Sanitize screenshot image paths if any contain raw base64
+    const cleanScreenshots = await Promise.all(
+      (validated.screenshots || []).map(async (s: any) => {
+        if (s && s.imagePath) {
+          const cleanPath = await extractAndStoreDataUrls(s.imagePath);
+          return { ...s, imagePath: cleanPath };
+        }
+        return s;
+      })
+    );
+
     const project = await prisma.project.create({
       data: {
         title: validated.title,
         slug: validated.slug,
-        tagline: validated.tagline,
-        description: validated.description,
-        fullDescription: validated.fullDescription,
+        tagline: cleanTagline,
+        description: cleanDescription,
+        fullDescription: cleanFullDescription,
         categoryType: validated.categoryType as any,
         featured: validated.featured,
         published: validated.published,
-        featuredImage: validated.featuredImage || null,
+        featuredImage: cleanFeaturedImage,
         gradient: validated.gradient,
         techStack: validated.techStack,
         features: validated.features,
-        screenshots: validated.screenshots,
+        screenshots: cleanScreenshots,
         githubUrl: validated.githubUrl || null,
         liveUrl: validated.liveUrl || null,
         apkUrl: validated.apkUrl || null,
@@ -258,7 +309,7 @@ export async function createProject(input: ProjectInput) {
         solutions: validated.solutions,
         lessonsLearned: validated.lessonsLearned,
         futureImprovements: validated.futureImprovements,
-        systemArchitecture: validated.systemArchitecture || null,
+        systemArchitecture: cleanArch,
         status: validated.status || "Completed",
         classification: validated.classification || null,
       } as any,
@@ -282,22 +333,39 @@ export async function updateProject(id: string, input: ProjectInput) {
     await ensureProjectColumnsAreLongText();
     const validated = projectSchema.parse(input);
 
+    const cleanDescription = (await extractAndStoreDataUrls(validated.description)) || validated.description;
+    const cleanFullDescription = (await extractAndStoreDataUrls(validated.fullDescription)) || validated.fullDescription;
+    const cleanTagline = (await extractAndStoreDataUrls(validated.tagline)) || validated.tagline;
+    const cleanArch = await extractAndStoreDataUrls(validated.systemArchitecture);
+    const cleanFeaturedImage = await extractAndStoreDataUrls(validated.featuredImage);
+
+    // Sanitize screenshot image paths if any contain raw base64
+    const cleanScreenshots = await Promise.all(
+      (validated.screenshots || []).map(async (s: any) => {
+        if (s && s.imagePath) {
+          const cleanPath = await extractAndStoreDataUrls(s.imagePath);
+          return { ...s, imagePath: cleanPath };
+        }
+        return s;
+      })
+    );
+
     const project = await prisma.project.update({
       where: { id },
       data: {
         title: validated.title,
         slug: validated.slug,
-        tagline: validated.tagline,
-        description: validated.description,
-        fullDescription: validated.fullDescription,
+        tagline: cleanTagline,
+        description: cleanDescription,
+        fullDescription: cleanFullDescription,
         categoryType: validated.categoryType as any,
         featured: validated.featured,
         published: validated.published,
-        featuredImage: validated.featuredImage || null,
+        featuredImage: cleanFeaturedImage,
         gradient: validated.gradient,
         techStack: validated.techStack,
         features: validated.features,
-        screenshots: validated.screenshots,
+        screenshots: cleanScreenshots,
         githubUrl: validated.githubUrl || null,
         liveUrl: validated.liveUrl || null,
         apkUrl: validated.apkUrl || null,
@@ -307,7 +375,7 @@ export async function updateProject(id: string, input: ProjectInput) {
         solutions: validated.solutions,
         lessonsLearned: validated.lessonsLearned,
         futureImprovements: validated.futureImprovements,
-        systemArchitecture: validated.systemArchitecture || null,
+        systemArchitecture: cleanArch,
         status: validated.status || "Completed",
         classification: validated.classification || null,
       } as any,

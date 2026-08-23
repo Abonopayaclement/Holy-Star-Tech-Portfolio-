@@ -230,18 +230,55 @@ async function ensureBlogPostColumnsAreLongText() {
   }
 }
 
+async function extractAndStoreDataUrls(rawText: string): Promise<string> {
+  if (!rawText || !rawText.includes("data:image/")) return rawText;
+
+  let text = rawText;
+  const dataUrlRegex = /data:(image\/[a-zA-Z0-9+.-]+);base64,([A-Za-z0-9+/=\r\n]+)/g;
+  const matches = [...text.matchAll(dataUrlRegex)];
+
+  for (const match of matches) {
+    const fullDataUrl = match[0];
+    const mimeType = match[1];
+    const base64Data = match[2].replace(/\s/g, "");
+
+    const ext = mimeType.includes("png") ? ".png" : mimeType.includes("webp") ? ".webp" : ".jpg";
+    const assetId = `media_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+    try {
+      await prisma.$executeRawUnsafe(
+        "INSERT INTO `media_asset` (`id`, `filename`, `mimeType`, `size`, `data`, `createdAt`, `updatedAt`) VALUES (?, ?, ?, ?, ?, NOW(3), NOW(3))",
+        assetId,
+        `image${ext}`,
+        mimeType,
+        Math.round((base64Data.length * 3) / 4),
+        base64Data
+      );
+
+      text = text.split(fullDataUrl).join(`/api/media/${assetId}${ext}`);
+    } catch (e) {
+      console.warn("Failed to extract data URL:", e);
+    }
+  }
+
+  return text;
+}
+
 export async function createBlogPost(input: BlogPostInput) {
   try {
     await requireAdminSession();
     await ensureBlogPostColumnsAreLongText();
     const validated = blogPostSchema.parse(input);
 
+    const cleanContent = await extractAndStoreDataUrls(validated.content);
+    const cleanExcerpt = await extractAndStoreDataUrls(validated.excerpt);
+
     const post = await (prisma.blogPost as any).create({
       data: {
         title: validated.title,
         slug: validated.slug,
-        excerpt: validated.excerpt,
-        content: validated.content,
+        excerpt: cleanExcerpt,
+        content: cleanContent,
         category: validated.category,
         readTime: validated.readTime,
         featured: validated.featured,
@@ -272,6 +309,9 @@ export async function updateBlogPost(id: string, input: BlogPostInput) {
     await ensureBlogPostColumnsAreLongText();
     const validated = blogPostSchema.parse(input);
 
+    const cleanContent = await extractAndStoreDataUrls(validated.content);
+    const cleanExcerpt = await extractAndStoreDataUrls(validated.excerpt);
+
     const existing = await prisma.blogPost.findUnique({ where: { id } });
     if (!existing) {
       return { success: false, error: "Blog post not found." };
@@ -282,8 +322,8 @@ export async function updateBlogPost(id: string, input: BlogPostInput) {
       data: {
         title: validated.title,
         slug: validated.slug,
-        excerpt: validated.excerpt,
-        content: validated.content,
+        excerpt: cleanExcerpt,
+        content: cleanContent,
         category: validated.category,
         readTime: validated.readTime,
         featured: validated.featured,

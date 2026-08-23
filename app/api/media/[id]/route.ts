@@ -19,9 +19,32 @@ export async function GET(request: NextRequest, { params }: RouteProps) {
     // Clean extension if present in the URL (e.g. /api/media/cm12345.png -> cm12345)
     const cleanId = id.split(".")[0];
 
-    const asset = await (prisma as any).mediaAsset.findUnique({
-      where: { id: cleanId },
-    });
+    let asset: any = null;
+    try {
+      asset = await (prisma as any).mediaAsset.findUnique({
+        where: { id: cleanId },
+      });
+    } catch {
+      // Fallback direct raw SQL query
+      const rows: any[] = await prisma.$queryRawUnsafe(
+        "SELECT * FROM `media_asset` WHERE `id` = ? LIMIT 1",
+        cleanId
+      );
+      if (rows && rows.length > 0) {
+        asset = rows[0];
+      }
+    }
+
+    if (!asset) {
+      // Check if ID matches without prefix or exact match
+      const rows: any[] = await prisma.$queryRawUnsafe(
+        "SELECT * FROM `media_asset` WHERE `id` = ? LIMIT 1",
+        cleanId
+      );
+      if (rows && rows.length > 0) {
+        asset = rows[0];
+      }
+    }
 
     if (!asset) {
       return new NextResponse("Media asset not found", { status: 404 });

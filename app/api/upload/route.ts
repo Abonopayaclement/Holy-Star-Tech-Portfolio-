@@ -99,42 +99,55 @@ export async function POST(request: Request) {
       path.extname(file.name) ||
       (isPdf ? ".pdf" : isVideo ? ".mp4" : isApk ? ".apk" : ".png");
 
-    let publicUrl: string;
+    const assetId = `media_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const mimeType = isPdf
+      ? "application/pdf"
+      : isVideo
+      ? (file.type || "video/mp4")
+      : isApk
+      ? "application/vnd.android.package-archive"
+      : (file.type || "image/jpeg");
 
+    const base64Data = buffer.toString("base64");
+
+    // 1. Primary permanent storage: Save to Aiven MySQL MediaAsset table
     try {
-      // 1. Primary permanent storage: Save to Aiven MySQL MediaAsset table
-      const asset = await (prisma as any).mediaAsset.create({
-        data: {
-          filename: file.name,
-          mimeType: file.type || (isVideo ? "video/mp4" : "image/jpeg"),
-          size: file.size,
-          data: buffer.toString("base64"),
-        },
-      });
-
-      publicUrl = `/api/media/${asset.id}${ext}`;
-
-      // 2. Secondary fast mirror in local development environment
       try {
-        const uploadDir = path.join(process.cwd(), "public", "uploads", subDir);
-        await mkdir(uploadDir, { recursive: true });
-        const filePath = path.join(uploadDir, `${subDir}_${asset.id}${ext}`);
-        await writeFile(filePath, buffer);
+        await (prisma as any).mediaAsset.create({
+          data: {
+            id: assetId,
+            filename: file.name,
+            mimeType,
+            size: file.size,
+            data: base64Data,
+          },
+        });
       } catch {
-        // Local filesystem not available (e.g. Vercel read-only runtime) - Aiven media endpoint serves it
+        await prisma.$executeRawUnsafe(
+          "INSERT INTO `media_asset` (`id`, `filename`, `mimeType`, `size`, `data`, `createdAt`, `updatedAt`) VALUES (?, ?, ?, ?, ?, NOW(3), NOW(3))",
+          assetId,
+          file.name,
+          mimeType,
+          file.size,
+          base64Data
+        );
       }
     } catch (dbErr) {
-      console.warn("Database media storage fallback:", dbErr);
-      // Fallback to data URL or local disk if database table not yet initialized
-      const mimeType = isPdf
-        ? "application/pdf"
-        : isVideo
-        ? "video/mp4"
-        : isApk
-        ? "application/vnd.android.package-archive"
-        : file.type || "image/jpeg";
-      publicUrl = `data:${mimeType};base64,${buffer.toString("base64")}`;
+      console.warn("Database media storage warning:", dbErr);
     }
+
+    // 2. Secondary local file mirror for local dev
+    try {
+      const uploadDir = path.join(process.cwd(), "public", "uploads", subDir);
+      await mkdir(uploadDir, { recursive: true });
+      const filePath = path.join(uploadDir, `${subDir}_${assetId}${ext}`);
+      await writeFile(filePath, buffer);
+    } catch {
+      // Read-only filesystem in cloud runtime (Vercel) is normal
+    }
+
+    // Always return clean, minimized /api/media/ URL
+    const publicUrl = `/api/media/${assetId}${ext}`;
 
     return NextResponse.json({
       success: true,
