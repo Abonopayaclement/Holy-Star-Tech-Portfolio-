@@ -170,6 +170,28 @@ export async function getDraftBlogPosts() {
   }
 }
 
+export async function getBlogPostBySlug(slug: string) {
+  try {
+    const post = await prisma.blogPost.findUnique({
+      where: { slug },
+    });
+    if (!post) return null;
+
+    // If draft, only allow authenticated admin
+    if (!post.published) {
+      try {
+        await requireAdminSession();
+      } catch {
+        return null;
+      }
+    }
+    return post;
+  } catch (error) {
+    console.error(`Failed to fetch blog post by slug ${slug}:`, error);
+    return null;
+  }
+}
+
 export async function createBlogPost(input: BlogPostInput) {
   try {
     await requireAdminSession();
@@ -191,12 +213,16 @@ export async function createBlogPost(input: BlogPostInput) {
     });
 
     revalidatePath("/blog");
+    revalidatePath(`/blog/${validated.slug}`);
     revalidatePath("/private/blog");
     revalidatePath("/private/drafts");
     revalidatePath("/");
     return { success: true, post };
   } catch (error: any) {
     console.error("Failed to create blog post:", error);
+    if (error.code === "P2002") {
+      return { success: false, error: "An article with this URL slug already exists. Please choose a different slug or title." };
+    }
     return { success: false, error: error.message || "Failed to create article." };
   }
 }
@@ -231,12 +257,19 @@ export async function updateBlogPost(id: string, input: BlogPostInput) {
     });
 
     revalidatePath("/blog");
+    revalidatePath(`/blog/${validated.slug}`);
+    if (existing.slug !== validated.slug) {
+      revalidatePath(`/blog/${existing.slug}`);
+    }
     revalidatePath("/private/blog");
     revalidatePath("/private/drafts");
     revalidatePath("/");
     return { success: true, post };
   } catch (error: any) {
     console.error("Failed to update blog post:", error);
+    if (error.code === "P2002") {
+      return { success: false, error: "An article with this URL slug already exists." };
+    }
     return { success: false, error: error.message || "Failed to update article." };
   }
 }
@@ -253,6 +286,7 @@ export async function togglePublishStatus(id: string, published: boolean) {
     });
 
     revalidatePath("/blog");
+    revalidatePath(`/blog/${post.slug}`);
     revalidatePath("/private/blog");
     revalidatePath("/private/drafts");
     revalidatePath("/");
@@ -266,9 +300,13 @@ export async function togglePublishStatus(id: string, published: boolean) {
 export async function deleteBlogPost(id: string) {
   try {
     await requireAdminSession();
+    const existing = await prisma.blogPost.findUnique({ where: { id } });
     await prisma.blogPost.delete({ where: { id } });
 
     revalidatePath("/blog");
+    if (existing?.slug) {
+      revalidatePath(`/blog/${existing.slug}`);
+    }
     revalidatePath("/private/blog");
     revalidatePath("/private/drafts");
     revalidatePath("/");

@@ -14,6 +14,8 @@ import { getBlogPosts, BlogPostRecord } from "@/actions/blog";
 import { getSkillsData, SkillItem } from "@/actions/profile";
 import { CardEngagement } from "@/components/public/CardEngagement";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [projects, posts, skills] = await Promise.all([
     getProjects(),
@@ -134,7 +136,7 @@ export default async function HomePage() {
                         href={`/projects/${project.slug}`}
                         className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-500 hover:underline"
                       >
-                        <span>View Case Study</span>
+                        <span>View Project</span>
                         <ArrowRight className="h-3.5 w-3.5" />
                       </Link>
                     </div>

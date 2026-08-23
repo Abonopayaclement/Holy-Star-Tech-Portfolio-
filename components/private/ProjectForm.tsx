@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { createProject, updateProject, ProjectInput } from "@/actions/projects";
+import { compressImageClient } from "@/lib/image-compression";
 import { HeartHandshake } from "lucide-react";
 
 interface ProjectFormProps {
@@ -148,16 +149,22 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
     }
   };
 
-  // Helper file upload handler
+  // Helper file upload handler with client-side compression
   const uploadFile = async (
     file: File,
     fieldKey: string
   ): Promise<string | null> => {
     setUploadingField(fieldKey);
-    const formData = new FormData();
-    formData.append("file", file);
+    const toastId = toast.loading("Processing and uploading file...", { id: "proj-upload" });
 
     try {
+      const processedFile = file.type.startsWith("image/")
+        ? await compressImageClient(file)
+        : file;
+
+      const formData = new FormData();
+      formData.append("file", processedFile);
+
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
@@ -167,9 +174,10 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Upload failed");
       }
+      toast.success("File uploaded successfully!", { id: "proj-upload" });
       return data.url;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to upload file.");
+      toast.error(err instanceof Error ? err.message : "Failed to upload file.", { id: "proj-upload" });
       return null;
     } finally {
       setUploadingField(null);
@@ -298,18 +306,37 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
 
   // Form Submit Handler
   const handleSubmit = async (publishNow: boolean) => {
-    if (!title.trim() || !slug.trim() || !tagline.trim() || !description.trim()) {
-      toast.error("Please fill in Title, Slug, Tagline, and Short Description.");
+    if (isSubmitting) return;
+
+    if (!title.trim()) {
+      toast.error("Please enter a Project Title.");
+      return;
+    }
+    if (!slug.trim()) {
+      toast.error("Please enter a URL Slug.");
+      return;
+    }
+    if (!tagline.trim()) {
+      toast.error("Please enter a Tagline.");
+      return;
+    }
+    if (!description.trim()) {
+      toast.error("Please enter a Short Description.");
       return;
     }
 
     setIsSubmitting(true);
+    const toastId = toast.loading(
+      publishNow ? "Publishing project to live portfolio..." : "Saving project draft...",
+      { id: "save-project" }
+    );
+
     const payload: ProjectInput = {
-      title,
-      slug,
-      tagline,
-      description,
-      fullDescription: fullDescription || description,
+      title: title.trim(),
+      slug: slug.trim().toLowerCase().replace(/[^a-z0-9-_]/g, "-"),
+      tagline: tagline.trim(),
+      description: description.trim(),
+      fullDescription: (fullDescription || description).trim(),
       categoryType,
       featured,
       published: publishNow,
@@ -318,16 +345,16 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
       techStack,
       features,
       screenshots,
-      githubUrl: githubUrl || null,
-      liveUrl: liveUrl || null,
-      apkUrl: apkUrl || null,
-      version: version || null,
-      androidVersion: androidVersion || null,
+      githubUrl: githubUrl ? githubUrl.trim() : null,
+      liveUrl: liveUrl ? liveUrl.trim() : null,
+      apkUrl: apkUrl ? apkUrl.trim() : null,
+      version: version ? version.trim() : null,
+      androidVersion: androidVersion ? androidVersion.trim() : null,
       challenges,
       solutions,
       lessonsLearned,
       futureImprovements,
-      systemArchitecture: systemArchitecture || null,
+      systemArchitecture: systemArchitecture ? systemArchitecture.trim() : null,
       status: status || "Completed",
       classification: classification || "Personal Project",
     };
@@ -338,28 +365,32 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
         if (res.success) {
           toast.success(
             publishNow
-              ? "Project updated and published!"
-              : "Project updated as draft!"
+              ? "Project updated and published live!"
+              : "Project updated as draft in Drafts section!",
+            { id: toastId }
           );
-          router.push("/private/projects");
+          router.push(publishNow ? "/private/projects" : "/private/drafts");
+          router.refresh();
         } else {
-          toast.error(res.error || "Failed to update project.");
+          toast.error(res.error || "Failed to update project.", { id: toastId });
         }
       } else {
         const res = await createProject(payload);
         if (res.success) {
           toast.success(
             publishNow
-              ? "Project created and published!"
-              : "Draft project saved successfully!"
+              ? "Project created and published live to website!"
+              : "Draft project saved in Drafts section!",
+            { id: toastId }
           );
-          router.push("/private/projects");
+          router.push(publishNow ? "/private/projects" : "/private/drafts");
+          router.refresh();
         } else {
-          toast.error(res.error || "Failed to create project.");
+          toast.error(res.error || "Failed to create project.", { id: toastId });
         }
       }
-    } catch {
-      toast.error("An error occurred while saving project.");
+    } catch (err: any) {
+      toast.error(err?.message || "An error occurred while saving project.", { id: toastId });
     } finally {
       setIsSubmitting(false);
     }

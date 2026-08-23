@@ -28,6 +28,7 @@ import { createBlogPost, updateBlogPost, BlogPostInput } from "@/actions/blog";
 import { deleteComment, getEngagementStats } from "@/actions/engagement";
 import { SeoPreviewModal } from "@/components/private/SeoPreviewModal";
 import { PromotionKitModal } from "@/components/shared/PromotionKitModal";
+import { compressImageClient } from "@/lib/image-compression";
 import { MessageSquare, Heart } from "lucide-react";
 
 interface BlogEditorModalProps {
@@ -171,21 +172,23 @@ export function BlogEditorModal({
     setContent(newContent);
   };
 
-  // Handle direct file upload from phone or computer
+  // Handle direct file upload from phone or computer with client-side compression
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const rawFile = e.target.files?.[0];
+    if (!rawFile) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const toastId = toast.loading("Uploading file...", { id: "upload-status" });
+    const toastId = toast.loading("Processing and uploading image...", { id: "upload-status" });
     setIsUploading(true);
 
     try {
+      // Compress image client-side if needed to prevent payload errors on mobile
+      const file = await compressImageClient(rawFile);
+      const formData = new FormData();
+      formData.append("file", file);
+
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
@@ -208,10 +211,10 @@ export function BlogEditorModal({
         }
       }
 
-      toast.success("File uploaded and attached to article successfully!", { id: toastId });
+      toast.success("Image uploaded and attached successfully!", { id: toastId });
     } catch (err) {
       console.error(err);
-      toast.error(err instanceof Error ? err.message : "Failed to upload file.", { id: toastId });
+      toast.error(err instanceof Error ? err.message : "Failed to upload image.", { id: toastId });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -222,19 +225,34 @@ export function BlogEditorModal({
 
   // Submit Handler: publishNow boolean differentiates "Save as Draft" vs "Publish"
   const handleSubmit = async (publishNow: boolean) => {
-    if (!title.trim() || !slug.trim() || !content.trim()) {
-      toast.error("Please fill in Title, Slug, and Post Content.");
+    if (isSubmitting) return;
+
+    if (!title.trim()) {
+      toast.error("Please enter an article title.");
+      return;
+    }
+    if (!slug.trim()) {
+      toast.error("Please enter a URL slug.");
+      return;
+    }
+    if (!content.trim()) {
+      toast.error("Please enter article content.");
       return;
     }
 
     setIsSubmitting(true);
+    const toastId = toast.loading(
+      publishNow ? "Publishing article to live portfolio..." : "Saving article draft...",
+      { id: "save-blog" }
+    );
+
     const payload: BlogPostInput = {
-      title,
-      slug,
-      excerpt: excerpt || title,
-      content,
-      category,
-      readTime,
+      title: title.trim(),
+      slug: slug.trim().toLowerCase().replace(/[^a-z0-9-_]/g, "-"),
+      excerpt: excerpt.trim() || title.trim(),
+      content: content.trim(),
+      category: category.trim() || "Architecture",
+      readTime: readTime.trim() || "5 min read",
       featured,
       published: publishNow,
       images,
@@ -246,30 +264,32 @@ export function BlogEditorModal({
         if (res.success) {
           toast.success(
             publishNow
-              ? "Blog post published immediately!"
-              : "Draft post updated successfully!"
+              ? "Blog post published live!"
+              : "Draft post updated successfully!",
+            { id: toastId }
           );
           onSuccess();
           onClose();
         } else {
-          toast.error(res.error || "Failed to update article.");
+          toast.error(res.error || "Failed to update article.", { id: toastId });
         }
       } else {
         const res = await createBlogPost(payload);
         if (res.success) {
           toast.success(
             publishNow
-              ? "Blog post published to website!"
-              : "Draft post saved successfully!"
+              ? "Blog post published live to website!"
+              : "Draft post saved successfully in Drafts!",
+            { id: toastId }
           );
           onSuccess();
           onClose();
         } else {
-          toast.error(res.error || "Failed to create article.");
+          toast.error(res.error || "Failed to create article.", { id: toastId });
         }
       }
-    } catch {
-      toast.error("An error occurred while saving post.");
+    } catch (err: any) {
+      toast.error(err?.message || "An unexpected error occurred while saving.", { id: toastId });
     } finally {
       setIsSubmitting(false);
     }

@@ -138,11 +138,35 @@ export async function getAllProjectsAdmin() {
   }
 }
 
+export async function getDraftProjects(): Promise<any[]> {
+  try {
+    await requireAdminSession();
+    return await prisma.project.findMany({
+      where: { published: false },
+      orderBy: { updatedAt: "desc" },
+    });
+  } catch (error) {
+    console.error("Failed to fetch draft projects:", error);
+    return [];
+  }
+}
+
 export async function getProjectBySlug(slug: string) {
   try {
-    return await prisma.project.findUnique({
+    const project = await prisma.project.findUnique({
       where: { slug },
     });
+    if (!project) return null;
+    
+    // If project is a draft, only allow authenticated admin to view it
+    if (!project.published) {
+      try {
+        await requireAdminSession();
+      } catch {
+        return null;
+      }
+    }
+    return project;
   } catch (error) {
     console.error(`Failed to fetch project by slug ${slug}:`, error);
     return null;
@@ -197,7 +221,9 @@ export async function createProject(input: ProjectInput) {
     });
 
     revalidatePath("/projects");
+    revalidatePath(`/projects/${validated.slug}`);
     revalidatePath("/private/projects");
+    revalidatePath("/private/drafts");
     revalidatePath("/");
     return { success: true, project };
   } catch (error: any) {
@@ -245,6 +271,7 @@ export async function updateProject(id: string, input: ProjectInput) {
     revalidatePath("/projects");
     revalidatePath(`/projects/${validated.slug}`);
     revalidatePath("/private/projects");
+    revalidatePath("/private/drafts");
     revalidatePath("/");
     return { success: true, project };
   } catch (error: any) {
@@ -262,7 +289,9 @@ export async function toggleProjectPublishStatus(id: string, published: boolean)
     });
 
     revalidatePath("/projects");
+    revalidatePath(`/projects/${project.slug}`);
     revalidatePath("/private/projects");
+    revalidatePath("/private/drafts");
     revalidatePath("/");
     return { success: true, project };
   } catch (error: any) {
@@ -274,10 +303,15 @@ export async function toggleProjectPublishStatus(id: string, published: boolean)
 export async function deleteProject(id: string) {
   try {
     await requireAdminSession();
+    const existing = await prisma.project.findUnique({ where: { id } });
     await prisma.project.delete({ where: { id } });
 
     revalidatePath("/projects");
+    if (existing?.slug) {
+      revalidatePath(`/projects/${existing.slug}`);
+    }
     revalidatePath("/private/projects");
+    revalidatePath("/private/drafts");
     revalidatePath("/");
     return { success: true };
   } catch (error: any) {

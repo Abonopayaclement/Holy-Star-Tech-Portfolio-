@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
 
   reactStrictMode: true,
   compress: true,
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
+  },
   images: {
     formats: ["image/avif", "image/webp"],
   },

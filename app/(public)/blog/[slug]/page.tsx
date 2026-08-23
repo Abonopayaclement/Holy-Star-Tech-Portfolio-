@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { siteConfig } from "@/config/site";
 import { getProjects } from "@/actions/projects";
+import { getBlogPostBySlug } from "@/actions/blog";
 import { ArticleDetailClient } from "@/app/(public)/blog/[slug]/ArticleDetailClient";
+
+export const dynamic = "force-dynamic";
 
 interface ArticleSlugPageProps {
   params: Promise<{
@@ -15,9 +18,7 @@ export async function generateMetadata({
   params,
 }: ArticleSlugPageProps): Promise<Metadata> {
   const resolvedParams = await params;
-  const post = await prisma.blogPost.findUnique({
-    where: { slug: resolvedParams.slug },
-  });
+  const post = await getBlogPostBySlug(resolvedParams.slug);
 
   if (!post) {
     return {
@@ -60,9 +61,7 @@ export async function generateMetadata({
 
 export default async function ArticleDetailPage({ params }: ArticleSlugPageProps) {
   const resolvedParams = await params;
-  const post = await prisma.blogPost.findUnique({
-    where: { slug: resolvedParams.slug },
-  });
+  const post = await getBlogPostBySlug(resolvedParams.slug);
 
   if (!post) {
     notFound();
