@@ -4,6 +4,7 @@ import "@/styles/globals.css";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { ToasterProvider } from "@/providers/ToasterProvider";
 import { siteConfig } from "@/config/site";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -63,6 +64,7 @@ export default function RootLayout({
           {children}
           <ToasterProvider />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
