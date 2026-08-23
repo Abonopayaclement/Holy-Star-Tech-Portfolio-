@@ -10,6 +10,8 @@ interface CardEngagementProps {
   targetType: "BLOG" | "PROJECT";
   slug: string;
   itemTitle: string;
+  initialLikes?: number;
+  initialComments?: number;
 }
 
 function getVisitorId(): string {
@@ -26,12 +28,18 @@ function getVisitorId(): string {
   }
 }
 
-export function CardEngagement({ targetType, slug, itemTitle }: CardEngagementProps) {
-  const [likesCount, setLikesCount] = useState(0);
-  const [totalComments, setTotalComments] = useState(0);
+export function CardEngagement({
+  targetType,
+  slug,
+  itemTitle,
+  initialLikes = 0,
+  initialComments = 0,
+}: CardEngagementProps) {
+  const [likesCount, setLikesCount] = useState(initialLikes);
+  const [totalComments, setTotalComments] = useState(initialComments);
   const [hasLiked, setHasLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [commentModalOpen, setCommentModalOpen] = useState(false);
 
   const loadEngagement = async () => {
@@ -43,8 +51,6 @@ export function CardEngagement({ targetType, slug, itemTitle }: CardEngagementPr
       setHasLiked(stats.hasLiked);
     } catch (err) {
       console.error("Failed to load card engagement:", err);
-    } finally {
-      setIsLoading(false);
     }
   };
 

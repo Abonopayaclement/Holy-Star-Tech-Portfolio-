@@ -97,21 +97,42 @@ async function seedDefaultProjectsIfEmpty() {
   }
 }
 
-export async function getProjects(): Promise<ProjectInput[]> {
+export interface ProjectWithEngagement extends ProjectInput {
+  likesCount?: number;
+  commentsCount?: number;
+}
+
+export async function getProjects(): Promise<ProjectWithEngagement[]> {
   try {
     await seedDefaultProjectsIfEmpty();
     const list = await prisma.project.findMany({
       where: { published: true },
       orderBy: { createdAt: "asc" },
+      include: {
+        _count: {
+          select: {
+            likes: true,
+            comments: { where: { published: true } },
+          },
+        },
+      },
     });
-    if (list.length > 0) return list as unknown as ProjectInput[];
+    if (list.length > 0) {
+      return list.map((p: any) => ({
+        ...p,
+        likesCount: p._count?.likes ?? 0,
+        commentsCount: p._count?.comments ?? 0,
+      })) as ProjectWithEngagement[];
+    }
     return projectsData.map((p) => ({
       ...p,
       published: true,
       featured: p.featured ?? false,
       categoryType: p.categoryType as "WEB_APP" | "MOBILE_APP" | "UI_UX" | "ACADEMIC" | "OTHER",
       gradient: p.gradient || "from-amber-500/20 via-indigo-600/20 to-cyan-500/20",
-    })) as ProjectInput[];
+      likesCount: 0,
+      commentsCount: 0,
+    })) as ProjectWithEngagement[];
   } catch (error) {
     console.error("Failed to fetch published projects:", error);
     return projectsData.map((p) => ({
@@ -120,7 +141,9 @@ export async function getProjects(): Promise<ProjectInput[]> {
       featured: p.featured ?? false,
       categoryType: p.categoryType as "WEB_APP" | "MOBILE_APP" | "UI_UX" | "ACADEMIC" | "OTHER",
       gradient: p.gradient || "from-amber-500/20 via-indigo-600/20 to-cyan-500/20",
-    })) as ProjectInput[];
+      likesCount: 0,
+      commentsCount: 0,
+    })) as ProjectWithEngagement[];
   }
 }
 

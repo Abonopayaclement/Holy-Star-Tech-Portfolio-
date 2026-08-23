@@ -94,13 +94,25 @@ model ProjectCategory {
   projects  Project[]
 }
 
+model MediaAsset {
+  id        String   @id @default(cuid())
+  filename  String
+  mimeType  String
+  size      Int
+  data      String   @db.LongText
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("media_asset")
+}
+
 model Project {
   id              String           @id @default(cuid())
   slug            String           @unique
   title           String
-  tagline         String           @db.Text
-  description     String           @db.Text
-  fullDescription String           @db.Text
+  tagline         String           @db.LongText
+  description     String           @db.LongText
+  fullDescription String           @db.LongText
   categoryType    CategoryType     @default(WEB_APP)
   categoryId      String?
   category        ProjectCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
@@ -120,7 +132,7 @@ model Project {
   solutions       Json // Array of strings
   lessonsLearned  Json // Array of strings
   futureImprovements Json? // Array of strings
-  systemArchitecture String? @db.Text
+  systemArchitecture String? @db.LongText
   status          String?          @default("Completed")
   classification  String?
   order           Int              @default(0)
@@ -134,7 +146,7 @@ model BlogPost {
   id          String   @id @default(cuid())
   slug        String   @unique
   title       String
-  excerpt     String   @db.Text
+  excerpt     String   @db.LongText
   content     String   @db.LongText
   category    String   @default("Architecture")
   readTime    String   @default("5 min read")

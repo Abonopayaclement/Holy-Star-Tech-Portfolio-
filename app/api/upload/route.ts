@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { getAdminSession } from "@/lib/auth-guard";
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +21,7 @@ export async function POST(request: Request) {
 
     if (!file) {
       return NextResponse.json(
-        { success: false, error: "No file provided." },
+        { success: false, error: "No file provided for upload." },
         { status: 400 }
       );
     }
@@ -33,16 +36,22 @@ export async function POST(request: Request) {
       file.type === "application/x-pdf" ||
       file.type === "application/acrobat";
     const isImage = file.type.startsWith("image/");
+    const isVideo =
+      file.type.startsWith("video/") ||
+      fileNameLower.endsWith(".mp4") ||
+      fileNameLower.endsWith(".webm") ||
+      fileNameLower.endsWith(".mov") ||
+      fileNameLower.endsWith(".mkv");
     const isApk =
       fileNameLower.endsWith(".apk") ||
       file.type === "application/vnd.android.package-archive" ||
       file.type === "application/octet-stream";
 
-    if (!isPdf && !isImage && !isApk) {
+    if (!isPdf && !isImage && !isVideo && !isApk) {
       return NextResponse.json(
         {
           success: false,
-          error: "Only PDF documents, images, and APK files are supported.",
+          error: "Unsupported file type. Please upload images, videos (MP4/WebM/MOV), PDFs, or APKs.",
         },
         { status: 400 }
       );
@@ -54,6 +63,9 @@ export async function POST(request: Request) {
     if (isPdf) {
       subDir = "cv";
       fileCategory = "pdf";
+    } else if (isVideo) {
+      subDir = "videos";
+      fileCategory = "video";
     } else if (isApk) {
       subDir = "apk";
       fileCategory = "apk";
@@ -62,32 +74,44 @@ export async function POST(request: Request) {
       fileCategory = "image";
     }
 
-    let publicUrl: string;
-
-    // Clean filename
     const ext =
       path.extname(file.name) ||
-      (isPdf ? ".pdf" : isApk ? ".apk" : ".png");
-    const nameWithoutExt = path
-      .basename(file.name, ext)
-      .replace(/[^a-zA-Z0-9_-]/g, "_");
-    const uniqueFileName = `${subDir}_${Date.now()}_${nameWithoutExt}${ext}`;
+      (isPdf ? ".pdf" : isVideo ? ".mp4" : isApk ? ".apk" : ".png");
+
+    let publicUrl: string;
 
     try {
-      // Attempt local filesystem write (works in local dev environment)
-      const uploadDir = path.join(process.cwd(), "public", "uploads", subDir);
-      await mkdir(uploadDir, { recursive: true });
-      const filePath = path.join(uploadDir, uniqueFileName);
-      await writeFile(filePath, buffer);
-      publicUrl = `/uploads/${subDir}/${uniqueFileName}`;
-    } catch (fsErr: any) {
-      // If filesystem is read-only (e.g. Vercel Serverless runtime / EROFS)
-      // Fall back seamlessly to a Base64 data URL
+      // 1. Primary permanent storage: Save to Aiven MySQL MediaAsset table
+      const asset = await (prisma as any).mediaAsset.create({
+        data: {
+          filename: file.name,
+          mimeType: file.type || (isVideo ? "video/mp4" : "image/jpeg"),
+          size: file.size,
+          data: buffer.toString("base64"),
+        },
+      });
+
+      publicUrl = `/api/media/${asset.id}${ext}`;
+
+      // 2. Secondary fast mirror in local development environment
+      try {
+        const uploadDir = path.join(process.cwd(), "public", "uploads", subDir);
+        await mkdir(uploadDir, { recursive: true });
+        const filePath = path.join(uploadDir, `${subDir}_${asset.id}${ext}`);
+        await writeFile(filePath, buffer);
+      } catch {
+        // Local filesystem not available (e.g. Vercel read-only runtime) - Aiven media endpoint serves it
+      }
+    } catch (dbErr) {
+      console.warn("Database media storage fallback:", dbErr);
+      // Fallback to data URL or local disk if database table not yet initialized
       const mimeType = isPdf
         ? "application/pdf"
+        : isVideo
+        ? "video/mp4"
         : isApk
         ? "application/vnd.android.package-archive"
-        : file.type || "image/png";
+        : file.type || "image/jpeg";
       publicUrl = `data:${mimeType};base64,${buffer.toString("base64")}`;
     }
 
@@ -101,7 +125,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Upload handler error:", error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : "Failed to upload file." },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to process and save uploaded file.",
+      },
       { status: 500 }
     );
   }

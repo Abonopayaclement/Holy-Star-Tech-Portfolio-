@@ -33,6 +33,8 @@ export interface BlogPostRecord {
   createdAt?: Date | string;
   updatedAt?: Date | string;
   images?: string[] | unknown;
+  likesCount?: number;
+  commentsCount?: number;
 }
 
 const defaultArticles: BlogPostRecord[] = [
@@ -135,12 +137,34 @@ export async function getBlogPosts(): Promise<BlogPostRecord[]> {
     const list = await prisma.blogPost.findMany({
       where: { published: true },
       orderBy: { publishedAt: "desc" },
+      include: {
+        _count: {
+          select: {
+            likes: true,
+            comments: { where: { published: true } },
+          },
+        },
+      },
     });
-    if (list.length > 0) return list as unknown as BlogPostRecord[];
-    return defaultArticles;
+    if (list.length > 0) {
+      return list.map((p: any) => ({
+        ...p,
+        likesCount: p._count?.likes ?? 0,
+        commentsCount: p._count?.comments ?? 0,
+      })) as BlogPostRecord[];
+    }
+    return defaultArticles.map((a) => ({
+      ...a,
+      likesCount: 0,
+      commentsCount: 0,
+    }));
   } catch (error) {
     console.error("Failed to fetch blog posts:", error);
-    return defaultArticles;
+    return defaultArticles.map((a) => ({
+      ...a,
+      likesCount: 0,
+      commentsCount: 0,
+    }));
   }
 }
 

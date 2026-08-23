@@ -180,12 +180,21 @@ export function BlogEditorModal({
     const rawFile = e.target.files?.[0];
     if (!rawFile) return;
 
-    const toastId = toast.loading("Processing and uploading image...", { id: "upload-status" });
+    const isVideo = rawFile.type.startsWith("video/");
+    if (isVideo && rawFile.size > 4.5 * 1024 * 1024) {
+      toast.error("Video file exceeds 4.5MB limit. Please upload a compressed MP4/WebM under 4.5MB or link directly.");
+      return;
+    }
+
+    const toastId = toast.loading(
+      isVideo ? "Processing and uploading video..." : "Processing and uploading image...",
+      { id: "upload-status" }
+    );
     setIsUploading(true);
 
     try {
       // Compress image client-side if needed to prevent payload errors on mobile
-      const file = await compressImageClient(rawFile);
+      const file = isVideo ? rawFile : await compressImageClient(rawFile);
       const formData = new FormData();
       formData.append("file", file);
 
@@ -200,21 +209,21 @@ export function BlogEditorModal({
       }
 
       if (data.url) {
-        if (data.fileType === "image") {
+        if (data.fileType === "video" || isVideo) {
+          setImages((prev: string[]) => [...prev, data.url]);
+          // Append video HTML snippet to content
+          setContent((prev) => prev + `\n\n<video src="${data.url}" controls class="w-full rounded-2xl my-4 shadow-md"></video>\n`);
+          toast.success("Video attached successfully!", { id: toastId });
+        } else {
           setImages((prev: string[]) => [...prev, data.url]);
           // Append image markdown snippet to content
           setContent((prev) => prev + `\n\n![${data.fileName}](${data.url})\n`);
-        } else if (data.fileType === "video") {
-          setImages((prev: string[]) => [...prev, data.url]);
-          // Append video HTML snippet to content
-          setContent((prev) => prev + `\n\n<video src="${data.url}" controls class="w-full rounded-2xl my-4"></video>\n`);
+          toast.success("Image uploaded and attached successfully!", { id: toastId });
         }
       }
-
-      toast.success("Image uploaded and attached successfully!", { id: toastId });
     } catch (err) {
       console.error(err);
-      toast.error(err instanceof Error ? err.message : "Failed to upload image.", { id: toastId });
+      toast.error(err instanceof Error ? err.message : "Failed to upload media.", { id: toastId });
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
