@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { MessageSquare, Send, ShieldCheck, Sparkles, User, X } from "lucide-react";
+import { MessageSquare, Send, ShieldCheck, User, X } from "lucide-react";
 import { toast } from "sonner";
 import { addComment, getPublicEngagement } from "@/actions/engagement";
 
@@ -177,7 +177,6 @@ export function QuickCommentModal({
                     {review.adminReply && (
                       <div className="ml-8 mt-2.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-3 space-y-1 text-xs">
                         <div className="flex items-center gap-1.5 text-indigo-400 font-bold text-[11px]">
-                          <Sparkles className="h-3 w-3 text-amber-400" />
                           <span>Admin Reply</span>
                         </div>
                         <p className="text-foreground leading-relaxed text-xs">

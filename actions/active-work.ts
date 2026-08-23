@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireAdminSession } from "@/lib/auth-guard";
 
 export interface ActiveWorkData {
   title: string;
@@ -55,6 +56,7 @@ export async function getActiveWork() {
 
 export async function updateActiveWork(data: ActiveWorkData) {
   try {
+    await requireAdminSession();
     const existing = await (prisma as any).aboutInfo.findFirst();
     const payload = JSON.stringify({
       activeWorkTitle: data.title,

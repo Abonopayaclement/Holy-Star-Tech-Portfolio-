@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Heart, MessageSquare, Sparkles } from "lucide-react";
+import { Heart, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { getPublicEngagement, toggleLike } from "@/actions/engagement";
 import { SimpleAddCommentModal } from "@/components/public/SimpleAddCommentModal";
@@ -99,7 +99,7 @@ export function EngagementSection({ targetType, slug, itemTitle }: EngagementSec
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 rounded-3xl border border-border/80 bg-card p-6 sm:p-8 shadow-md">
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-emerald-500">
-            <Sparkles className="h-4 w-4" /> Community Reactions
+            Community Reactions
           </div>
           <h3 className="text-xl font-bold text-foreground">{itemTitle}</h3>
           <div className="flex items-center gap-4 text-xs font-mono font-bold pt-1">
@@ -186,7 +186,6 @@ export function EngagementSection({ targetType, slug, itemTitle }: EngagementSec
                   {review.adminReply && (
                     <div className="mt-3 rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-3 space-y-1 text-xs">
                       <div className="flex items-center gap-1.5 text-indigo-400 font-bold text-[11px]">
-                        <Sparkles className="h-3 w-3 text-amber-400" />
                         <span>Admin Reply</span>
                       </div>
                       <p className="text-foreground leading-relaxed text-xs">

@@ -43,6 +43,7 @@ export const projectsData: DetailedProject[] = [
     classification: "Academic Project",
     featured: false,
     status: "Completed",
+    featuredImage: "/uploads/images/images_1786199559199_Screenshot_2026-08-08_143226.png",
     gradient: "from-purple-500/20 via-indigo-600/20 to-blue-500/20",
     techStack: ["Python", "MySQL", "HTML", "CSS", "Flask"],
     features: [
@@ -53,8 +54,8 @@ export const projectsData: DetailedProject[] = [
       "Fee payment record verification portal",
     ],
     screenshots: [
-      { title: "Room Allocation Matrix", subtitle: "Hostel room capacity & gender eligibility verification", aspect: "aspect-video" },
-      { title: "Maintenance Request Hub", subtitle: "Online student issue reporting & tracking panel", aspect: "aspect-video" },
+      { title: "Screenshot 2026-08-08 140604", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1786199386021_Screenshot_2026-08-08_140604.png" },
+      { title: "Screenshot 2026-08-08 140655", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1786199459944_Screenshot_2026-08-08_140655.png" },
     ],
     githubUrl: "https://github.com/ayebonoclement",
     challenges: [
@@ -91,6 +92,7 @@ export const projectsData: DetailedProject[] = [
     classification: "Academic Project",
     featured: true,
     status: "Completed",
+    featuredImage: "/uploads/images/images_1787143375651_Screenshot_2026-08-19_123616.png",
     gradient: "from-indigo-600/20 via-purple-600/20 to-pink-500/20",
     techStack: ["JavaScript", "React", "Node.js", "Express.js", "MySQL"],
     features: [
@@ -99,7 +101,10 @@ export const projectsData: DetailedProject[] = [
       "Role-based authorization for students and executives",
     ],
     screenshots: [
-      { title: "Student Dashboard Mockup", subtitle: "Course manager and community portal", aspect: "aspect-video" },
+      { title: "student portal", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1787143466261_student_portal.png" },
+      { title: "HOD Portal", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1787143721615_HOD_Portal.png" },
+      { title: "lecturers portal", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1787143731653_lecturers_portal.png" },
+      { title: "programs", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1787143776275_programs.png" },
     ],
     githubUrl: "https://github.com/ayebonoclement",
     challenges: ["Structuring authorization roles for student executives."],
@@ -122,6 +127,7 @@ export const projectsData: DetailedProject[] = [
     classification: "Commercial Product",
     featured: true,
     status: "Completed",
+    featuredImage: "/uploads/images/images_1787177397873_homep.png",
     gradient: "from-amber-500/20 via-indigo-600/20 to-cyan-500/20",
     techStack: ["HTML", "CSS", "JavaScript", "React", "Next.js", "Node.js", "MySQL"],
     features: [
@@ -131,8 +137,10 @@ export const projectsData: DetailedProject[] = [
       "Revenue summary & occupancy tracking",
     ],
     screenshots: [
-      { title: "Dashboard Overview", subtitle: "Real-time occupancy metrics", aspect: "aspect-video" },
-      { title: "Reservation Matrix", subtitle: "Room availability calendar", aspect: "aspect-video" },
+      { title: "guest", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1787177414798_guest.png" },
+      { title: "gallery", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1787177424943_gallery.png" },
+      { title: "services", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1787177464174_services.png" },
+      { title: "Screenshot 2026-08-19 161827", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1787177479850_Screenshot_2026-08-19_161827.png" },
     ],
     githubUrl: "https://github.com/ayebonoclement",
     challenges: ["Managing room availability constraints and automated billing."],
@@ -186,6 +194,7 @@ export const projectsData: DetailedProject[] = [
     classification: "Academic Project",
     featured: false,
     status: "Completed",
+    featuredImage: "/uploads/images/images_1787146017506_home.png",
     gradient: "from-emerald-500/20 via-teal-600/20 to-cyan-500/20",
     techStack: ["Angular", "TypeScript", "HTML5", "CSS3"],
     features: [
@@ -194,7 +203,10 @@ export const projectsData: DetailedProject[] = [
       "Daily sales summary interface",
     ],
     screenshots: [
-      { title: "Sales Checkout Screen", subtitle: "Angular checkout interface & receipt calculator", aspect: "aspect-video" },
+      { title: "home", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1787146622266_home.png" },
+      { title: "Admin", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1787146659666_Admin.png" },
+      { title: "Report", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1787146698676_Report.png" },
+      { title: "Add or Edit", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1787146729301_Add_or_Edit.png" },
     ],
     githubUrl: "https://github.com/ayebonoclement",
     challenges: ["Building responsive reactive UI components in Angular for fast checkout without relying on a database backend."],
@@ -216,6 +228,7 @@ export const projectsData: DetailedProject[] = [
     categoryType: "MOBILE_APP",
     featured: true,
     status: "Completed",
+    featuredImage: "/uploads/images/images_1786202280955_Screenshot_20260808_143649_One_UI_Home.jpg",
     gradient: "from-blue-500/20 via-indigo-600/20 to-purple-500/20",
     techStack: ["Android Studio", "Java", "Android SDK", "XML UI"],
     features: [
@@ -224,7 +237,10 @@ export const projectsData: DetailedProject[] = [
       "App-by-app data consumption breakdown",
     ],
     screenshots: [
-      { title: "Data Meter Screen", subtitle: "Visual gauge of data consumed", aspect: "aspect-video" },
+      { title: "Screenshot_20260808_143704_Smart Data Usage", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1786202301906_Screenshot_20260808_143704_Smart_Data_Usage.jpg" },
+      { title: "Screenshot_20260808_143721_Smart Data Usage", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1786202310522_Screenshot_20260808_143721_Smart_Data_Usage.jpg" },
+      { title: "Screenshot_20260808_143730_Smart Data Usage", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1786202329795_Screenshot_20260808_143730_Smart_Data_Usage.jpg" },
+      { title: "Screenshot_20260808_143746_Smart Data Usage", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1786202344658_Screenshot_20260808_143746_Smart_Data_Usage.jpg" },
     ],
     githubUrl: "https://github.com/ayebonoclement",
     challenges: ["Fetching accurate network statistics across Android versions."],
@@ -246,6 +262,7 @@ export const projectsData: DetailedProject[] = [
     categoryType: "MOBILE_APP",
     featured: false,
     status: "In Progress",
+    featuredImage: "/uploads/images/images_1786201335281_Screenshot_20260808_143649_One_UI_Home.jpg",
     gradient: "from-amber-500/20 via-orange-600/20 to-red-500/20",
     techStack: ["Android Studio", "Java", "XML UI"],
     features: [
@@ -254,7 +271,8 @@ export const projectsData: DetailedProject[] = [
       "Responsive layout for phone viewports",
     ],
     screenshots: [
-      { title: "Calculator Interface", subtitle: "Clean numeric keypad layout", aspect: "aspect-video" },
+      { title: "Screenshot_20260808_143628_HST Calculator", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1786201206664_Screenshot_20260808_143628_HST_Calculator.jpg" },
+      { title: "Screenshot_20260808_143637_HST Calculator", subtitle: "System Interface Screen", aspect: "aspect-video", imagePath: "/uploads/images/images_1786201404874_Screenshot_20260808_143637_HST_Calculator.jpg" },
     ],
     githubUrl: "https://github.com/ayebonoclement",
     challenges: ["Handling operator precedence in complex mathematical expressions."],

@@ -13,7 +13,6 @@ import {
   Info,
   Mail,
   Plus,
-  Sparkles,
   UserCheck,
   Users,
 } from "lucide-react";
@@ -66,7 +65,7 @@ export default function PrivateDashboardHome() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-amber-500">
-                <Sparkles className="h-4 w-4" /> Administration Control Center
+                Administration Control Center
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
                 Welcome Back, Abonopaya Clement Ayebono

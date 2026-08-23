@@ -1,5 +1,4 @@
 import * as React from "react";
-import { Sparkles } from "lucide-react";
 
 interface SectionHeaderProps {
   badge?: string;
@@ -25,8 +24,7 @@ export function SectionHeader({
       } ${className}`}
     >
       {badge && (
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-indigo-500">
-          <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+        <div className="mb-3 inline-flex items-center rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-indigo-500">
           <span>{badge}</span>
         </div>
       )}

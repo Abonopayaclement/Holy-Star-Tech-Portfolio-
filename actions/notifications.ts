@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireAdminSession } from "@/lib/auth-guard";
 
 function generateId(prefix: string): string {
   return prefix + "_" + Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
@@ -57,6 +58,7 @@ export async function createNotification(
 
 export async function getDashboardNotifications() {
   try {
+    await requireAdminSession();
     await ensureNotificationTableExist();
     let notifications: any[] = [];
     let unreadCount = 0;
@@ -105,6 +107,7 @@ export async function getDashboardNotifications() {
 
 export async function getAllNotificationsAdmin(filter: "ALL" | "UNREAD" | "READ" = "ALL") {
   try {
+    await requireAdminSession();
     await ensureNotificationTableExist();
     let notifications: any[] = [];
     let unreadCount = 0;
@@ -170,6 +173,7 @@ export async function getAllNotificationsAdmin(filter: "ALL" | "UNREAD" | "READ"
 
 export async function markNotificationAsRead(id: string) {
   try {
+    await requireAdminSession();
     await ensureNotificationTableExist();
     const p = prisma as any;
     if (p.notification) {
@@ -194,6 +198,7 @@ export async function markNotificationAsRead(id: string) {
 
 export async function markAllNotificationsAsRead() {
   try {
+    await requireAdminSession();
     await ensureNotificationTableExist();
     const p = prisma as any;
     if (p.notification) {
@@ -218,6 +223,7 @@ export async function markAllNotificationsAsRead() {
 
 export async function deleteNotification(id: string) {
   try {
+    await requireAdminSession();
     await ensureNotificationTableExist();
     const p = prisma as any;
     if (p.notification) {
@@ -239,6 +245,7 @@ export async function deleteNotification(id: string) {
 
 export async function clearAllNotifications() {
   try {
+    await requireAdminSession();
     await ensureNotificationTableExist();
     const p = prisma as any;
     if (p.notification) {

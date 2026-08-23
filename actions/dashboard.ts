@@ -2,9 +2,11 @@
 
 import { prisma } from "@/lib/prisma";
 import { projectsData } from "@/constants/projects";
+import { requireAdminSession } from "@/lib/auth-guard";
 
 export async function getDashboardMetrics() {
   try {
+    await requireAdminSession();
     // 1. Projects Metrics
     let totalProjects = 0;
     let featuredProjects = 0;

@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { requireAdminSession } from "@/lib/auth-guard";
 
 export interface VisitPayload {
   visitorId: string;
@@ -92,6 +93,7 @@ export async function recordVisitorEvent(payload: VisitPayload) {
 
 export async function clearVisitorLogs() {
   try {
+    await requireAdminSession();
     await ensureVisitorLogTableExist();
     const p = prisma as any;
     if (p.visitorLog) {
@@ -108,6 +110,7 @@ export async function clearVisitorLogs() {
 
 export async function getVisitorAnalytics() {
   try {
+    await requireAdminSession();
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const startOfWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);

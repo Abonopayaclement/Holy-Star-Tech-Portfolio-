@@ -1,5 +1,4 @@
 import * as React from "react";
-import { Sparkles } from "lucide-react";
 
 interface PageHeaderBannerProps {
   badge?: string;
@@ -74,9 +73,8 @@ export function PageHeaderBanner({
       >
         {badge && (
           <div
-            className={`inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 backdrop-blur-md mb-3 px-3.5 py-1 text-xs`}
+            className={`inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/10 backdrop-blur-md mb-3 px-3.5 py-1 text-xs`}
           >
-            <Sparkles className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
             <span className="font-mono font-semibold uppercase tracking-wider text-amber-400">
               {badge}
             </span>

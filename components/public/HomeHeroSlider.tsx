@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight, Mail, Sparkles } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Mail } from "lucide-react";
 import { siteConfig } from "@/config/site";
 
 const heroSlides = [
@@ -108,8 +108,7 @@ export function HomeHeroSlider() {
 
                 {/* Hero Call To Actions & Integrated Author Name */}
                 <div className="flex flex-wrap items-center gap-4 pt-4">
-                  <div className="inline-flex items-center gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/15 px-4 py-3.5 text-xs font-mono font-bold text-amber-300 backdrop-blur-md min-h-[48px]">
-                    <Sparkles className="h-4 w-4 text-amber-400 animate-pulse" />
+                  <div className="inline-flex items-center rounded-xl border border-amber-500/30 bg-amber-500/15 px-4 py-3.5 text-xs font-mono font-bold text-amber-300 backdrop-blur-md min-h-[48px]">
                     <span>{siteConfig.author}</span>
                   </div>
 

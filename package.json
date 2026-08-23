@@ -5,10 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:prod": "next build && node scripts/package-standalone.js",
+    "package": "node scripts/package-standalone.js",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
-    "prepare": "husky",
     "db:seed": "npx prisma db seed"
   },
   "prisma": {

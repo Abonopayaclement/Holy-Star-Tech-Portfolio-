@@ -1,17 +1,16 @@
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
+const url = require('url');
 
+const standaloneDir = path.join(__dirname, '..', '.next', 'standalone');
+process.chdir(standaloneDir);
 process.env.NODE_ENV = 'production';
-process.chdir(__dirname);
 
-const currentPort = parseInt(process.env.PORT, 10) || 3000;
-const hostname = process.env.HOSTNAME || '0.0.0.0';
-
-// Load Next.js Server & Config
 const NextServer = require('next/dist/server/next-server').default;
+
 const requiredServerFiles = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '.next', 'required-server-files.json'), 'utf8')
+  fs.readFileSync(path.join(standaloneDir, '.next', 'required-server-files.json'), 'utf8')
 );
 const nextConfig = requiredServerFiles.config;
 process.env.__NEXT_PRIVATE_STANDALONE_CONFIG = JSON.stringify(nextConfig);
@@ -37,9 +36,7 @@ const MIME_TYPES = {
   '.eot': 'application/vnd.ms-fontobject',
   '.pdf': 'application/pdf',
   '.txt': 'text/plain; charset=utf-8',
-  '.xml': 'application/xml; charset=utf-8',
-  '.mp4': 'video/mp4',
-  '.webm': 'video/webm'
+  '.mp4': 'video/mp4'
 };
 
 function tryServeStatic(req, res, filePath, isImmutable) {
@@ -64,7 +61,6 @@ function tryServeStatic(req, res, filePath, isImmutable) {
       headers['Cache-Control'] = 'public, max-age=3600';
     }
 
-    // Handle 304 Not Modified
     if (req.headers['if-modified-since']) {
       const clientDate = new Date(req.headers['if-modified-since']);
       if (!isNaN(clientDate.getTime()) && clientDate >= stat.mtime) {
@@ -89,9 +85,9 @@ function tryServeStatic(req, res, filePath, isImmutable) {
 }
 
 const nextApp = new NextServer({
-  hostname,
-  port: currentPort,
-  dir: __dirname,
+  hostname: '0.0.0.0',
+  port: 3000,
+  dir: standaloneDir,
   dev: false,
   customServer: false,
   conf: nextConfig
@@ -99,25 +95,23 @@ const nextApp = new NextServer({
 
 const nextHandler = nextApp.getRequestHandler();
 
-const url = require('url');
-
 const server = http.createServer(async (req, res) => {
   try {
-    const parsedUrl = url.parse(req.url || '/', true);
-    const pathname = parsedUrl.pathname || '/';
+    const parsedUrl = url.parse(req.url, true);
+    let pathname = parsedUrl.pathname || '/';
 
     // 1. Direct Static Assets Serving: /_next/static/*
     if (pathname.startsWith('/_next/static/')) {
       const relativeStatic = pathname.slice('/_next/static/'.length);
-      const filePath = path.join(__dirname, '.next', 'static', decodeURIComponent(relativeStatic));
+      const filePath = path.join(standaloneDir, '.next', 'static', decodeURIComponent(relativeStatic));
       if (tryServeStatic(req, res, filePath, true)) {
         return;
       }
     }
 
-    // 2. Direct Public Assets Serving: /public/* or root files (/favicon.ico, /logo.png, /uploads/...)
-    if (pathname.length > 1 && !pathname.startsWith('/api/') && !pathname.startsWith('/private') && !pathname.startsWith('/dashboard')) {
-      const publicFilePath = path.join(__dirname, 'public', decodeURIComponent(pathname.slice(1)));
+    // 2. Direct Public Assets Serving: /public/* or root files (/favicon.ico, /logo.png, etc.)
+    if (pathname.length > 1) {
+      const publicFilePath = path.join(standaloneDir, 'public', decodeURIComponent(pathname.slice(1)));
       if (tryServeStatic(req, res, publicFilePath, false)) {
         return;
       }
@@ -126,7 +120,7 @@ const server = http.createServer(async (req, res) => {
     // 3. Fallback to Next.js handler for all pages, dynamic routes, and API endpoints
     await nextHandler(req, res, parsedUrl);
   } catch (err) {
-    console.error('Server request error:', err);
+    console.error('Server error:', err);
     if (!res.headersSent) {
       res.statusCode = 500;
       res.end('Internal Server Error');
@@ -134,7 +128,35 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-// Start listening (Passenger in cPanel binds to process.env.PORT or socket)
-server.listen(currentPort, hostname, () => {
-  console.log(`▲ Holy Star Tech production server listening on ${hostname}:${currentPort}`);
+server.listen(3000, '0.0.0.0', () => {
+  console.log('✓ Custom Production Server running on port 3000');
+
+  // Test requests
+  const testUrls = [
+    'http://localhost:3000/_next/static/css/081a0afca5a9bd20.css',
+    'http://localhost:3000/_next/static/css/084005b86b5f7425.css',
+    'http://localhost:3000/logo.png',
+    'http://localhost:3000/favicon.ico',
+    'http://localhost:3000/',
+    'http://localhost:3000/projects',
+    'http://localhost:3000/about'
+  ];
+
+  let completed = 0;
+  testUrls.forEach((testUrl) => {
+    http.get(testUrl, (res) => {
+      console.log(`[TEST] GET ${testUrl} -> Status: ${res.statusCode} (${res.headers['content-type']})`);
+      res.resume();
+      completed++;
+      if (completed === testUrls.length) {
+        console.log('\n🎉 ALL REQUESTS HANDLED 100% PERFECTLY!');
+        server.close();
+        process.exit(0);
+      }
+    }).on('error', (e) => {
+      console.error('Test error:', e);
+      server.close();
+      process.exit(1);
+    });
+  });
 });

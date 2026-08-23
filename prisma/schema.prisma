@@ -106,7 +106,7 @@ model Project {
   category        ProjectCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   featured        Boolean          @default(false)
   published       Boolean          @default(true)
-  featuredImage   String?
+  featuredImage   String?          @db.LongText
   gradient        String           @default("from-amber-500/20 via-indigo-600/20 to-cyan-500/20")
   techStack       Json // Array of strings
   features        Json // Array of strings
@@ -135,7 +135,7 @@ model BlogPost {
   slug        String   @unique
   title       String
   excerpt     String   @db.Text
-  content     String   @db.Text
+  content     String   @db.LongText
   category    String   @default("Architecture")
   readTime    String   @default("5 min read")
   featured    Boolean  @default(false)

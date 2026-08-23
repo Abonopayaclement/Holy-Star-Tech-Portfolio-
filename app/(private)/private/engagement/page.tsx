@@ -16,7 +16,6 @@ import {
   Reply,
   Save,
   Search,
-  Sparkles,
   Trash2,
   X,
   MessageCircle,
@@ -671,7 +670,6 @@ export default function PrivateEngagementPage() {
                           <div className="ml-2 sm:ml-4 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-4 space-y-1 text-xs">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-1.5 text-indigo-400 font-bold">
-                                <Sparkles className="h-3.5 w-3.5" />
                                 <span>Official Admin Reply (Abonopaya Clement Ayebono)</span>
                               </div>
                               <span

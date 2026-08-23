@@ -55,10 +55,6 @@ export default function PrivateLoginPage() {
     const password = values.password;
 
     try {
-      // 1. Remove raw unhashed legacy database user if present
-      await prepareAdminUser(email);
-
-      // 2. Attempt sign-in via Better Auth API endpoint
       const signInRes = await authClient.signIn.email({
         email,
         password,
@@ -70,44 +66,16 @@ export default function PrivateLoginPage() {
         const from = searchParams.get("from") || "/private";
         setTimeout(() => {
           window.location.href = from;
-        }, 200);
+        }, 150);
         return;
       }
 
-      // 3. Fallback: Perform initial sign-up via Better Auth API endpoint
-      let signUpRes = await authClient.signUp.email({
-        email,
-        password,
-        name: siteConfig.author,
-      });
-
-      // 4. If sign-up fails because user already exists (out-of-sync password), reset account record & re-register
-      if (signUpRes.error) {
-        await resetAdminUser(email);
-        signUpRes = await authClient.signUp.email({
-          email,
-          password,
-          name: siteConfig.author,
-        });
-      }
-
-      if (signUpRes.error) {
-        const errorMsg =
-          signInRes.error?.message ||
-          signUpRes.error?.message ||
-          "Invalid administrator email or master password.";
-        setAuthError(errorMsg);
-        toast.error(errorMsg);
-        setIsLoading(false);
-        return;
-      }
-
-      toast.success("Administrator account registered & authenticated!");
-      const searchParams = new URLSearchParams(window.location.search);
-      const from = searchParams.get("from") || "/private";
-      setTimeout(() => {
-        window.location.href = from;
-      }, 200);
+      const errorMsg =
+        signInRes.error?.message ||
+        "Invalid administrator email and password.";
+      setAuthError(errorMsg);
+      toast.error(errorMsg);
+      setIsLoading(false);
     } catch (err) {
       console.error("Authentication error:", err);
       const msg = "An unexpected error occurred during sign in. Please try again.";

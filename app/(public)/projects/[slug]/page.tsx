@@ -12,7 +12,6 @@ import {
   Lightbulb,
   Rocket,
   ShieldAlert,
-  Sparkles,
   Terminal,
   Zap,
 } from "lucide-react";
@@ -350,7 +349,6 @@ export default async function ProjectDetailsPage({ params }: ProjectDetailsPageP
             {project.lessonsLearned && project.lessonsLearned.length > 0 && (
               <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-md space-y-3">
                 <div className="flex items-center gap-2 text-amber-500 border-b border-border/60 pb-2">
-                  <Sparkles className="h-4 w-4" />
                   <h3 className="text-sm font-bold text-foreground">Lessons Learned</h3>
                 </div>
                 <ul className="space-y-2">
