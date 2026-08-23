@@ -216,9 +216,24 @@ export async function getBlogPostBySlug(slug: string) {
   }
 }
 
+async function ensureBlogPostColumnsAreLongText() {
+  try {
+    await prisma.$executeRawUnsafe(`ALTER TABLE \`BlogPost\` MODIFY COLUMN \`content\` LONGTEXT NOT NULL;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE \`BlogPost\` MODIFY COLUMN \`excerpt\` LONGTEXT NOT NULL;`);
+  } catch {
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE \`blogpost\` MODIFY COLUMN \`content\` LONGTEXT NOT NULL;`);
+      await prisma.$executeRawUnsafe(`ALTER TABLE \`blogpost\` MODIFY COLUMN \`excerpt\` LONGTEXT NOT NULL;`);
+    } catch {
+      // Column may already be LONGTEXT or custom dialect
+    }
+  }
+}
+
 export async function createBlogPost(input: BlogPostInput) {
   try {
     await requireAdminSession();
+    await ensureBlogPostColumnsAreLongText();
     const validated = blogPostSchema.parse(input);
 
     const post = await (prisma.blogPost as any).create({
@@ -254,6 +269,7 @@ export async function createBlogPost(input: BlogPostInput) {
 export async function updateBlogPost(id: string, input: BlogPostInput) {
   try {
     await requireAdminSession();
+    await ensureBlogPostColumnsAreLongText();
     const validated = blogPostSchema.parse(input);
 
     const existing = await prisma.blogPost.findUnique({ where: { id } });

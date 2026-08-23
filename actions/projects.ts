@@ -208,9 +208,30 @@ export async function getProjectById(id: string) {
   }
 }
 
+async function ensureProjectColumnsAreLongText() {
+  try {
+    await prisma.$executeRawUnsafe(`ALTER TABLE \`Project\` MODIFY COLUMN \`tagline\` LONGTEXT NOT NULL;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE \`Project\` MODIFY COLUMN \`description\` LONGTEXT NOT NULL;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE \`Project\` MODIFY COLUMN \`fullDescription\` LONGTEXT NOT NULL;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE \`Project\` MODIFY COLUMN \`systemArchitecture\` LONGTEXT NULL;`);
+    await prisma.$executeRawUnsafe(`ALTER TABLE \`Project\` MODIFY COLUMN \`featuredImage\` LONGTEXT NULL;`);
+  } catch {
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE \`project\` MODIFY COLUMN \`tagline\` LONGTEXT NOT NULL;`);
+      await prisma.$executeRawUnsafe(`ALTER TABLE \`project\` MODIFY COLUMN \`description\` LONGTEXT NOT NULL;`);
+      await prisma.$executeRawUnsafe(`ALTER TABLE \`project\` MODIFY COLUMN \`fullDescription\` LONGTEXT NOT NULL;`);
+      await prisma.$executeRawUnsafe(`ALTER TABLE \`project\` MODIFY COLUMN \`systemArchitecture\` LONGTEXT NULL;`);
+      await prisma.$executeRawUnsafe(`ALTER TABLE \`project\` MODIFY COLUMN \`featuredImage\` LONGTEXT NULL;`);
+    } catch {
+      // Column may already be LONGTEXT
+    }
+  }
+}
+
 export async function createProject(input: ProjectInput) {
   try {
     await requireAdminSession();
+    await ensureProjectColumnsAreLongText();
     const validated = projectSchema.parse(input);
 
     const project = await prisma.project.create({
@@ -258,6 +279,7 @@ export async function createProject(input: ProjectInput) {
 export async function updateProject(id: string, input: ProjectInput) {
   try {
     await requireAdminSession();
+    await ensureProjectColumnsAreLongText();
     const validated = projectSchema.parse(input);
 
     const project = await prisma.project.update({

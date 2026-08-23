@@ -6,6 +6,25 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+async function ensureMediaAssetTableExists() {
+  try {
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS \`media_asset\` (
+        \`id\` VARCHAR(191) NOT NULL,
+        \`filename\` VARCHAR(191) NOT NULL,
+        \`mimeType\` VARCHAR(191) NOT NULL,
+        \`size\` INT NOT NULL,
+        \`data\` LONGTEXT NOT NULL,
+        \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        \`updatedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+        PRIMARY KEY (\`id\`)
+      ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    `);
+  } catch (err) {
+    // Ignore if already exists
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const session = await getAdminSession();
@@ -15,6 +34,8 @@ export async function POST(request: Request) {
         { status: 401 }
       );
     }
+
+    await ensureMediaAssetTableExists();
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
