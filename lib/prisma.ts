@@ -10,4 +10,8 @@ export const prisma =
     log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+// Always attach to globalThis to prevent multiple connection pools across serverless function re-evaluations
+if (!globalForPrisma.prisma) {
+  globalForPrisma.prisma = prisma;
+}
+
