@@ -196,7 +196,7 @@ async function getOrCreateTargetItem(targetType: "BLOG" | "PROJECT", slug: strin
               slug,
               excerpt: "Article excerpt",
               content: "Article content",
-              category: "Architecture",
+              category: "General",
               published: true,
             },
           });

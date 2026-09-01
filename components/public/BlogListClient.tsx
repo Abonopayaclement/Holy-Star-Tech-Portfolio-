@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -27,14 +27,6 @@ export interface DisplayArticle {
   commentsCount?: number;
 }
 
-const categories = [
-  "All",
-  "Career & Growth",
-  "Web Development",
-  "Mobile Development",
-  "Learning & Notes",
-] as const;
-
 const ITEMS_PER_PAGE = 6;
 
 interface BlogListClientProps {
@@ -57,12 +49,24 @@ export function BlogListClient({ initialArticles }: BlogListClientProps) {
       year: "numeric",
     }),
     readTime: p.readTime || "3 min read",
-    category: p.category || "Development",
+    category: p.category || "General",
     featured: p.featured,
     images: Array.isArray(p.images) ? (p.images as string[]) : [],
     likesCount: p.likesCount ?? 0,
     commentsCount: p.commentsCount ?? 0,
   }));
+
+  // Dynamically compute all unique categories present in the articles
+  const categories = useMemo(() => {
+    const unique = Array.from(
+      new Set(
+        mappedArticles
+          .map((a) => a.category?.trim())
+          .filter(Boolean)
+      )
+    ).sort();
+    return ["All", ...unique];
+  }, [mappedArticles]);
 
   // Filter articles by Search Query & Category
   const filteredArticles = mappedArticles.filter((article) => {

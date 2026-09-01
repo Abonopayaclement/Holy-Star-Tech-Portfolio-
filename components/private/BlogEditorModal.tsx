@@ -59,7 +59,7 @@ export function BlogEditorModal({
   const [slug, setSlug] = useState(initialData?.slug || "");
   const [excerpt, setExcerpt] = useState(initialData?.excerpt || "");
   const [content, setContent] = useState(initialData?.content || "");
-  const [category, setCategory] = useState(initialData?.category || "Architecture");
+  const [category, setCategory] = useState(initialData?.category || "");
   const [readTime, setReadTime] = useState(initialData?.readTime || "5 min read");
   const [featured, setFeatured] = useState(initialData?.featured || false);
   const [images, setImages] = useState<string[]>(initialData?.images || []);
@@ -102,7 +102,7 @@ export function BlogEditorModal({
       setSlug(initialData.slug);
       setExcerpt(initialData.excerpt);
       setContent(initialData.content);
-      setCategory(initialData.category || "Architecture");
+      setCategory(initialData.category || "");
       setReadTime(initialData.readTime || "5 min read");
       setFeatured(initialData.featured || false);
       setImages(initialData.images || []);
@@ -112,7 +112,7 @@ export function BlogEditorModal({
       setSlug("");
       setExcerpt("");
       setContent("");
-      setCategory("Architecture");
+      setCategory("");
       setReadTime("5 min read");
       setFeatured(false);
       setImages([]);
@@ -249,6 +249,11 @@ export function BlogEditorModal({
       return;
     }
 
+    if (!category.trim()) {
+      toast.error("Please enter a category for this article.");
+      return;
+    }
+
     setIsSubmitting(true);
     const toastId = toast.loading(
       publishNow ? "Publishing article to live portfolio..." : "Saving article draft...",
@@ -260,7 +265,7 @@ export function BlogEditorModal({
       slug: slug.trim().toLowerCase().replace(/[^a-z0-9-_]/g, "-"),
       excerpt: excerpt.trim() || title.trim(),
       content: content.trim(),
-      category: category.trim() || "Architecture",
+      category: category.trim(),
       readTime: readTime.trim() || "5 min read",
       featured,
       published: publishNow,
@@ -369,20 +374,15 @@ export function BlogEditorModal({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Category
+                Category *
               </label>
-              <select
+              <input
+                type="text"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-xl border border-border/80 bg-background px-3.5 py-2.5 text-sm text-foreground focus:border-indigo-500 focus:outline-hidden transition-colors"
-              >
-                <option value="Architecture">Architecture</option>
-                <option value="Next.js">Next.js</option>
-                <option value="Database">Database</option>
-                <option value="TypeScript">TypeScript</option>
-                <option value="DevOps">DevOps</option>
-                <option value="AI Integration">AI Integration</option>
-              </select>
+                placeholder="Enter a category..."
+                className="w-full rounded-xl border border-border/80 bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-indigo-500 focus:outline-hidden transition-colors"
+              />
             </div>
 
             <div className="flex items-center gap-3 pt-6">

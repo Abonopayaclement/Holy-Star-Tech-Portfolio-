@@ -10,7 +10,7 @@ const blogPostSchema = z.object({
   slug: z.string().min(3, "Slug is required."),
   excerpt: z.string().min(5, "Excerpt is required."),
   content: z.string().min(10, "Content is required."),
-  category: z.string().default("Architecture"),
+  category: z.string().trim().min(1, "Category is required."),
   readTime: z.string().default("5 min read"),
   featured: z.boolean().default(false),
   published: z.boolean().default(false),

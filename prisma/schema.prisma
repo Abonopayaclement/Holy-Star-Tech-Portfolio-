@@ -149,7 +149,7 @@ model BlogPost {
   title       String
   excerpt     String   @db.LongText
   content     String   @db.LongText
-  category    String   @default("Architecture")
+  category    String   @default("General")
   readTime    String   @default("5 min read")
   featured    Boolean  @default(false)
   published   Boolean  @default(true)

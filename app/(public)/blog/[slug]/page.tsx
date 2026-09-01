@@ -99,7 +99,7 @@ export default async function ArticleDetailPage({ params }: ArticleSlugPageProps
         title: post.title,
         excerpt: post.excerpt,
         content: post.content,
-        category: post.category || "Architecture",
+        category: post.category || "General",
         readTime: post.readTime || "3 min read",
         date: formattedDate,
         fullUrl,

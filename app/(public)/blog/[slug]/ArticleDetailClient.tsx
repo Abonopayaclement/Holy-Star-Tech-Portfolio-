@@ -85,7 +85,7 @@ export function ArticleDetailClient({
         <div className="space-y-6 text-center sm:text-left">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
             <span className="rounded-full bg-indigo-500/10 px-3 py-1 font-mono text-xs font-bold text-indigo-500">
-              {post.category || "Architecture"}
+              {post.category || "General"}
             </span>
             <span className="flex items-center gap-1.5 text-xs font-mono text-muted-foreground">
               <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
@@ -227,7 +227,7 @@ export function ArticleDetailClient({
                   >
                     <div className="space-y-2">
                       <span className="rounded-full bg-indigo-500/10 px-2 py-0.5 font-mono text-[10px] font-bold text-indigo-500">
-                        {rel.category || "Architecture"}
+                        {rel.category || "General"}
                       </span>
                       <h4 className="text-sm font-bold text-foreground group-hover:text-indigo-500 transition-colors line-clamp-2">
                         {rel.title}
