@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { ensureQueueLessTables } from "@/lib/queueless/initDb";
 
 const JWT_SECRET = process.env.JWT_SECRET || "queueless_jwt_secret_dev_key_2026";
 
@@ -41,6 +42,12 @@ export async function GET(
     const { route } = await context.params;
     const path = (route || []).join("/");
     const searchParams = request.nextUrl.searchParams;
+
+    // 0. Database Auto-Init Endpoint (/db/init)
+    if (path === "db/init") {
+      const res = await ensureQueueLessTables();
+      return json(res, res.success ? 200 : 500);
+    }
 
     // 1. Health check
     if (path === "health") {
@@ -303,6 +310,11 @@ export async function GET(
 
     return json({ message: "QueueLess API Route Not Found", path }, 404);
   } catch (error: any) {
+    if (error.message?.includes("1146") || error.message?.includes("doesn't exist")) {
+      console.log("[AUTO-HEAL] Table missing during GET. Initializing QueueLess tables...");
+      await ensureQueueLessTables();
+      return json({ message: "Database initialized. Please reload.", reloaded: true });
+    }
     console.error("QueueLess API GET Error:", error);
     return json({ error: error.message || "Internal server error" }, 500);
   }
@@ -329,10 +341,24 @@ export async function POST(
         return json({ error: "Email and password are required." }, 400);
       }
 
-      const users: any = await prisma.$queryRawUnsafe(
-        "SELECT * FROM `queueless_user` WHERE email = ? LIMIT 1",
-        email
-      );
+      let users: any = null;
+      try {
+        users = await prisma.$queryRawUnsafe(
+          "SELECT * FROM `queueless_user` WHERE email = ? LIMIT 1",
+          email
+        );
+      } catch (err: any) {
+        if (err.message?.includes("1146") || err.message?.includes("doesn't exist")) {
+          console.log("[AUTO-HEAL] queueless_user missing. Creating tables and seeding data...");
+          await ensureQueueLessTables();
+          users = await prisma.$queryRawUnsafe(
+            "SELECT * FROM `queueless_user` WHERE email = ? LIMIT 1",
+            email
+          );
+        } else {
+          throw err;
+        }
+      }
 
       if (!users || users.length === 0) {
         return json({ error: "Invalid email or password." }, 401);
@@ -579,6 +605,11 @@ export async function POST(
 
     return json({ message: "QueueLess API Route Not Found", path }, 404);
   } catch (error: any) {
+    if (error.message?.includes("1146") || error.message?.includes("doesn't exist")) {
+      console.log("[AUTO-HEAL] Table missing during POST. Initializing QueueLess tables...");
+      await ensureQueueLessTables();
+      return json({ message: "Database initialized. Please retry.", reloaded: true });
+    }
     console.error("QueueLess API POST Error:", error);
     return json({ error: error.message || "Internal server error" }, 500);
   }
