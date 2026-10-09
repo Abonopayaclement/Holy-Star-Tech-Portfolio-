@@ -28,6 +28,11 @@ const nextConfig: NextConfig = {
         source: "/queueless/api/:path*",
         destination: `${queuelessApiUrl.replace(/\/$/, "")}/api/:path*`,
       });
+    } else {
+      rewritesList.push({
+        source: "/queueless/api/:path*",
+        destination: "/api/queueless/:path*",
+      });
     }
 
     // Rewrite all QueueLess SPA routes to the compiled React index.html
