@@ -73,8 +73,8 @@ export function BlogEditorModal({
   const [commentsList, setCommentsList] = useState<Array<{ id: string; authorName: string; content: string; createdAt: string | Date; published?: boolean }>>([]);
   const [likesCount, setLikesCount] = useState(0);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const loadEngagement = async () => {
     if (initialData?.slug) {

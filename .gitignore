@@ -1,7 +1,18 @@
 # dependencies
-/node_modules
+node_modules/
+**/node_modules/
 /.pnp
 .pnp.js
+
+# QueueLess subproject ignores
+[Qq]ueueless/**/node_modules/
+[Qq]ueueless/**/.expo/
+[Qq]ueueless/**/dist/
+[Qq]ueueless/**/.cache/
+[Qq]ueueless/**/.env
+[Qq]ueueless/**/.env.local
+[Qq]ueueless/**/.env*.local
+![Qq]ueueless/**/.env.example
 
 # testing
 /coverage

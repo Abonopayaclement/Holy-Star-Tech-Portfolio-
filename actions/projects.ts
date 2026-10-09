@@ -91,6 +91,72 @@ async function seedDefaultProjectsIfEmpty() {
           where: { id: { in: idsToDelete } },
         });
       }
+
+      // Ensure all canonical projects exist and queueless-system is synced to enterprise showcase
+      for (const p of projectsData) {
+        const existing = dbProjects.find((dp) => dp.slug === p.slug);
+        let validCategoryType: any = "WEB_APP";
+        if (["WEB_APP", "MOBILE_APP", "UI_UX", "ACADEMIC", "OTHER"].includes(p.categoryType)) {
+          validCategoryType = p.categoryType;
+        }
+
+        if (!existing) {
+          await prisma.project.create({
+            data: {
+              title: p.title,
+              slug: p.slug,
+              tagline: p.tagline,
+              description: p.description,
+              fullDescription: p.fullDescription,
+              categoryType: validCategoryType,
+              featured: p.featured,
+              published: true,
+              featuredImage: p.featuredImage || null,
+              gradient: p.gradient,
+              techStack: p.techStack,
+              features: p.features,
+              screenshots: p.screenshots,
+              githubUrl: p.githubUrl || null,
+              liveUrl: p.liveUrl || null,
+              apkUrl: p.apkUrl || null,
+              version: p.version || null,
+              classification: p.classification || null,
+              challenges: p.challenges,
+              solutions: p.solutions,
+              lessonsLearned: p.lessonsLearned,
+              futureImprovements: (p as any).futureImprovements || [],
+              systemArchitecture: p.systemArchitecture || null,
+            } as any,
+          });
+        } else if (p.slug === "queueless-system" && existing.classification !== "Commercial Product") {
+          await prisma.project.update({
+            where: { id: existing.id },
+            data: {
+              title: p.title,
+              tagline: p.tagline,
+              description: p.description,
+              fullDescription: p.fullDescription,
+              categoryType: validCategoryType,
+              featured: p.featured,
+              featuredImage: p.featuredImage || null,
+              gradient: p.gradient,
+              techStack: p.techStack,
+              features: p.features,
+              screenshots: p.screenshots,
+              githubUrl: p.githubUrl || null,
+              liveUrl: p.liveUrl || null,
+              apkUrl: p.apkUrl || null,
+              version: p.version || null,
+              classification: p.classification || null,
+              challenges: p.challenges,
+              solutions: p.solutions,
+              lessonsLearned: p.lessonsLearned,
+              futureImprovements: (p as any).futureImprovements || [],
+              systemArchitecture: p.systemArchitecture || null,
+            } as any,
+          });
+        }
+      }
     }
   } catch (err) {
     console.warn("Seed default projects error:", err);

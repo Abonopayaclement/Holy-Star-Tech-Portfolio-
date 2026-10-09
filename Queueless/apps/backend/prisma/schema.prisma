@@ -1,0 +1,768 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  CUSTOMER
+  STAFF
+  BRANCH_MANAGER
+  ORG_ADMIN
+  SUPER_ADMIN
+}
+
+enum QueueStatus {
+  OPEN
+  CLOSED
+}
+
+enum EntryStatus {
+  WAITING
+  CALLING
+  SERVING
+  COMPLETED
+  SKIPPED
+  CANCELLED
+  ABSENT
+}
+
+enum PriorityLevel {
+  NORMAL
+  PRIORITY
+  APPOINTMENT
+}
+
+enum NotificationPreference {
+  STANDARD
+  NOTIFY_APPROACHING_5
+  NOTIFY_APPROACHING_2
+  NOTIFY_CALLED_ONLY
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  IMPORTANT
+  URGENT
+}
+
+enum CallbackChannel {
+  IN_APP_NOTIFICATION
+  PUSH_NOTIFICATION
+  SMS
+  WHATSAPP
+  PHONE_CALL
+}
+
+enum CallbackStatus {
+  ACTIVE
+  TRIGGERED
+  ACKNOWLEDGED
+  CANCELLED
+  EXPIRED
+}
+
+enum CallbackThreshold {
+  APPROACHING_5
+  APPROACHING_2
+  CALLED
+}
+
+enum ConversationStatus {
+  OPEN
+  RESOLVED
+  CLOSED
+}
+
+enum SenderType {
+  CUSTOMER
+  STAFF
+  SYSTEM
+}
+
+enum DeliveryChannel {
+  IN_APP
+  PUSH
+  SMS
+  EMAIL
+  WHATSAPP
+  VOICE
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  OPENED
+}
+
+enum AppointmentStatus {
+  PENDING
+  APPROVED
+  CONFIRMED
+  PAYMENT_PENDING
+  PAID
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum KioskStatus {
+  ACTIVE
+  INACTIVE
+  DISABLED
+}
+
+enum CounterStatus {
+  AVAILABLE
+  SERVING
+  PAUSED
+  OFFLINE
+}
+
+enum LobbyDisplayMode {
+  NOW_SERVING
+  QUEUE_OVERVIEW
+  COMBINED
+}
+
+enum TicketSource {
+  REMOTE
+  QR
+  WALK_IN
+  KIOSK
+  APPOINTMENT
+  STAFF_WALK_IN
+}
+
+model User {
+  id               String        @id @default(uuid())
+  email            String        @unique
+  passwordHash     String
+  firebaseUid      String?       @unique
+  fullName         String
+  profilePhoto     String?
+  phoneNumber      String?
+  dob              DateTime?
+  gender           String?
+  address          String?
+  region           String?
+  city             String?
+  country          String?
+  nationalId       String?
+  ghanaCardNumber  String?
+  emergencyContact String?
+  occupation       String?
+  passportNumber   String?
+  driversLicense   String?
+  nhisNumber       String?
+  idType           String?
+  idNumber         String?
+  pushToken        String?
+  role             Role          @default(CUSTOMER)
+  organizationId   String?
+  organization     Organization? @relation(fields: [organizationId], references: [id])
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  queueEntries    QueueEntry[]
+  appointments    Appointment[]
+  payments        Payment[]
+  managedBranches Branch[]      @relation("BranchManager")
+  staffBranch     Branch?       @relation("StaffBranch", fields: [staffBranchId], references: [id])
+  staffBranchId   String?
+  auditLogs       AuditLog[]
+  notifications   Notification[]
+  serviceRatings  ServiceRating[]
+  staffSkills     StaffSkill[]
+  callbackRequests CallbackRequest[]
+  devices          UserDevice[]
+  customerConversations Conversation[] @relation("CustomerConversations")
+  staffConversations    Conversation[] @relation("StaffConversations")
+  sentMessages          Message[]      @relation("SentMessages")
+  staffCounters         ServiceCounter[] @relation("CounterStaff")
+
+  @@map("queueless_user")
+}
+
+enum QrCodeType {
+  BRANCH
+  SERVICE
+}
+
+enum QrCodeStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  type        String
+  description String?  @db.Text
+  logo        String?
+  status       String   @default("ACTIVE")
+  contactEmail String?
+  contactPhone String?
+  address      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  branches      Branch[]
+  users         User[]
+  auditLogs     AuditLog[]
+  qrCodes       QRCode[]
+  notifications Notification[]
+  appointmentCategories AppointmentCategory[]
+  skills        Skill[]
+  conversations Conversation[]
+  callbackRequests CallbackRequest[]
+  kiosks        Kiosk[]
+  lobbyDisplays LobbyDisplay[]
+}
+
+model Branch {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  name           String
+  location       String
+  latitude       Float?
+  longitude      Float?
+  geofenceRadius Float        @default(100) // in meters
+  qrCodeId       String       @unique
+  isActive       Boolean      @default(true)
+  operatingHours String?      // e.g. "08:00 - 17:00"
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  services      Service[]
+  queues        Queue[]
+  appointments  Appointment[]
+  managers      User[]         @relation("BranchManager")
+  staff         User[]         @relation("StaffBranch")
+  auditLogs     AuditLog[]
+  qrCodes       QRCode[]
+  notifications Notification[]
+  appointmentCategories AppointmentCategory[]
+  conversations Conversation[]
+  callbackRequests CallbackRequest[]
+  kiosks        Kiosk[]
+  counters      ServiceCounter[]
+  lobbyDisplays LobbyDisplay[]
+  ticketSequences TicketSequence[]
+}
+
+model Service {
+  id              String   @id @default(uuid())
+  branchId        String
+  branch          Branch   @relation(fields: [branchId], references: [id])
+  name            String
+  description     String?  @db.Text
+  duration        Int      @default(15) // estimated duration in minutes
+  price           Decimal  @default(0.00) @db.Decimal(10, 2)
+  isActive        Boolean  @default(true)
+  allowRemoteJoin Boolean  @default(true)
+  allowQrJoin     Boolean  @default(true)
+  allowWalkIn     Boolean  @default(true)
+  allowAppointments Boolean @default(true)
+  priorityEnabled Boolean  @default(true)
+  servingCapacity Int      @default(1) // concurrent counters/servers
+  capacity        Int?     // max active waiting tickets
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  queues       Queue[]
+  appointments Appointment[]
+  qrCodes      QRCode[]
+  appointmentCategories AppointmentCategory[]
+  skillRequirements     ServiceSkillRequirement[]
+  counters              ServiceCounter[]
+  ticketSequences       TicketSequence[]
+}
+
+model Queue {
+  id           String      @id @default(uuid())
+  branchId     String
+  branch       Branch      @relation(fields: [branchId], references: [id])
+  serviceId    String
+  service      Service     @relation(fields: [serviceId], references: [id])
+  status       QueueStatus @default(CLOSED)
+  closedReason String?     @db.Text
+  closedAt     DateTime?
+  closedBy     String?
+  capacity     Int?        // queue-level capacity limit
+  servingCapacity Int      @default(1) // concurrent counters/servers
+  priorityRatio   Int      @default(2) // max consecutive priority customers served before a normal customer
+  consecutivePriorityCount Int @default(0) // runtime counter for fairness
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  entries QueueEntry[]
+}
+
+model QRCode {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  branchId       String
+  branch         Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  serviceId      String?
+  service        Service?     @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  token          String       @unique
+  type           QrCodeType   @default(BRANCH)
+  status         QrCodeStatus @default(ACTIVE)
+  expiresAt      DateTime?
+  createdBy      String?
+  createdAt      DateTime     @default(now())
+  revokedAt      DateTime?
+  revokedBy      String?
+
+  @@index([token])
+  @@index([organizationId])
+  @@index([branchId])
+  @@index([serviceId])
+  @@index([expiresAt])
+  @@index([status])
+}
+
+model QueueEntry {
+  id           String      @id @default(uuid())
+  queueId      String
+  queue        Queue       @relation(fields: [queueId], references: [id])
+  userId       String
+  user         User        @relation(fields: [userId], references: [id])
+  ticketNumber       String?     // e.g. "A-001"
+  counterNumber      String?     // e.g. "Counter 3", "Room 102"
+  servedByStaffId    String?     // Staff member who called/served
+  position           Int
+  priority           PriorityLevel @default(NORMAL)
+  notificationPreference NotificationPreference @default(STANDARD)
+  status             EntryStatus @default(WAITING)
+  joinedAt           DateTime    @default(now())
+  calledAt           DateTime?
+  servingAt          DateTime?
+  completedAt        DateTime?
+  cancelledAt        DateTime?
+  cancellationReason String?     @db.Text
+  cancelledBy        String?
+  isCustomerHidden   Boolean     @default(false)
+  customerHiddenAt   DateTime?
+
+  // Transfer tracking
+  transferredFromEntryId String?
+  transferredFromEntry   QueueEntry?  @relation("TicketTransfers", fields: [transferredFromEntryId], references: [id], onDelete: SetNull)
+  transferredToEntries   QueueEntry[] @relation("TicketTransfers")
+  originalServiceId      String?
+  transferredAt          DateTime?
+  transferredByStaffId   String?
+  transferReason         String?      @db.Text
+
+  // Phase 3 Ticketing & Kiosk Source
+  source             TicketSource @default(REMOTE)
+  kioskId            String?
+  kiosk              Kiosk?       @relation(fields: [kioskId], references: [id], onDelete: SetNull)
+  reprintCount       Int          @default(0)
+  lastReprintedAt    DateTime?
+  lastReprintedBy    String?
+
+  rating             ServiceRating?
+  callbackRequests   CallbackRequest[]
+  conversations      Conversation[]
+
+  @@index([queueId, status])
+  @@index([queueId, priority, status])
+  @@index([userId, isCustomerHidden])
+  @@index([counterNumber])
+  @@index([transferredFromEntryId])
+  @@index([source])
+  @@index([kioskId])
+  @@index([joinedAt])
+  @@index([completedAt])
+  @@index([calledAt])
+  @@index([servingAt])
+  @@index([servedByStaffId])
+}
+
+model Appointment {
+  id              String            @id @default(uuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id])
+  branchId        String
+  branch          Branch            @relation(fields: [branchId], references: [id])
+  serviceId       String
+  service         Service           @relation(fields: [serviceId], references: [id])
+  scheduledTime   DateTime?         @default(now())
+  status          AppointmentStatus @default(PENDING)
+  problemType     String?
+  categoryId      String?
+  category        AppointmentCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  fee             Decimal?          @db.Decimal(10, 2)
+  feeCurrency     String            @default("GHS")
+  rejectionReason String?           @db.Text
+  rejectionNote   String?           @db.Text
+  isProblemSolved Boolean?
+  feedbackNotes   String?           @db.Text
+  notes           String?           @db.Text
+  approvedAt      DateTime?
+  approvedBy      String?
+  paidAt          DateTime?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  
+  // Follow-up relationship & resolution tracking
+  originalAppointmentId String?
+  originalAppointment   Appointment?  @relation("AppointmentFollowUps", fields: [originalAppointmentId], references: [id], onDelete: SetNull)
+  followUps             Appointment[] @relation("AppointmentFollowUps")
+  followUpStatus        String?       // REQUESTED | IN_REVIEW | DIRECTED_TO_BRANCH | RESOLVED
+  followUpNote          String?       @db.Text
+  staffInstruction      String?       @db.Text
+  isFollowUpCovered     Boolean       @default(false)
+  isCustomerHidden      Boolean       @default(false)
+  customerHiddenAt      DateTime?
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  conversations   Conversation[]
+
+  @@index([userId, isCustomerHidden])
+  @@index([originalAppointmentId])
+  @@index([branchId, scheduledTime])
+  @@index([branchId, status, createdAt])
+  @@index([createdAt])
+}
+
+model AppointmentCategory {
+  id             String        @id @default(uuid())
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  branchId       String?
+  branch         Branch?       @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  serviceId      String?
+  service        Service?      @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  name           String
+  description    String?       @db.Text
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  appointments   Appointment[]
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id])
+  amount         Decimal       @db.Decimal(10, 2)
+  currency       String        @default("GHS")
+  status         PaymentStatus @default(PENDING)
+  transactionRef String        @unique
+  metadata       Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model AuditLog {
+  id             String        @id @default(uuid())
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  branchId       String?
+  branch         Branch?       @relation(fields: [branchId], references: [id])
+  userId         String?
+  user           User?         @relation(fields: [userId], references: [id])
+  action         String
+  details        String?       @db.Text
+  createdAt      DateTime      @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([branchId, createdAt])
+}
+
+model Notification {
+  id             String               @id @default(uuid())
+  userId         String?
+  user           User?                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?
+  organization   Organization?        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  branchId       String?
+  branch         Branch?              @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  type           String
+  title          String
+  message        String               @db.Text
+  metadata       Json?
+  priority       NotificationPriority @default(NORMAL)
+  entityType     String?              // QUEUE | APPOINTMENT | CONVERSATION | SYSTEM
+  entityId       String?
+  isRead         Boolean              @default(false)
+  readAt         DateTime?
+  expiresAt      DateTime?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  deliveries     NotificationDelivery[]
+
+  @@index([userId, isRead, createdAt])
+  @@index([userId, createdAt])
+  @@index([branchId, createdAt])
+  @@index([organizationId, createdAt])
+  @@index([entityType, entityId])
+}
+
+model NotificationDelivery {
+  id             String          @id @default(uuid())
+  notificationId String
+  notification   Notification    @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  channel        DeliveryChannel
+  status         DeliveryStatus  @default(PENDING)
+  attemptCount   Int             @default(0)
+  lastError      String?         @db.Text
+  sentAt         DateTime?
+  deliveredAt    DateTime?
+  failedAt       DateTime?
+  openedAt       DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([notificationId])
+  @@index([channel, status])
+}
+
+model CallbackRequest {
+  id             String            @id @default(uuid())
+  organizationId String
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  branchId       String
+  branch         Branch            @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  queueEntryId   String
+  queueEntry     QueueEntry        @relation(fields: [queueEntryId], references: [id], onDelete: Cascade)
+  threshold      CallbackThreshold @default(APPROACHING_5)
+  channel        CallbackChannel   @default(IN_APP_NOTIFICATION)
+  status         CallbackStatus    @default(ACTIVE)
+  triggeredAt    DateTime?
+  acknowledgedAt DateTime?
+  cancelledAt    DateTime?
+  expiresAt      DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([queueEntryId, status])
+  @@index([userId, status])
+  @@index([branchId, status])
+}
+
+model UserDevice {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token      String
+  platform   String   @default("EXPO") // EXPO | IOS | ANDROID | WEB
+  lastUsedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, token])
+  @@index([userId])
+  @@index([token])
+}
+
+model Conversation {
+  id             String             @id @default(uuid())
+  organizationId String
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  branchId       String
+  branch         Branch             @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  customerId     String
+  customer       User               @relation("CustomerConversations", fields: [customerId], references: [id], onDelete: Cascade)
+  staffId        String?
+  staff          User?              @relation("StaffConversations", fields: [staffId], references: [id], onDelete: SetNull)
+  queueEntryId   String?
+  queueEntry     QueueEntry?        @relation(fields: [queueEntryId], references: [id], onDelete: SetNull)
+  appointmentId  String?
+  appointment    Appointment?       @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  status         ConversationStatus @default(OPEN)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  messages       Message[]
+
+  @@index([customerId, status])
+  @@index([branchId, status])
+  @@index([organizationId])
+  @@index([queueEntryId])
+  @@index([appointmentId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  senderType     SenderType
+  message        String       @db.Text
+  isRead         Boolean      @default(false)
+  readAt         DateTime?
+  metadata       Json?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+}
+
+model ServiceRating {
+  id           String      @id @default(uuid())
+  queueEntryId String      @unique
+  queueEntry   QueueEntry  @relation(fields: [queueEntryId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branchId     String?
+  serviceId    String?
+  rating       Int         // 1 to 5
+  feedback     String?     @db.Text
+  tags         String?     // e.g. "FAST_SERVICE,HELPFUL_STAFF"
+  createdAt    DateTime    @default(now())
+
+  @@index([branchId, rating])
+  @@index([serviceId, rating])
+  @@index([userId])
+}
+
+model Skill {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  description    String?      @db.Text
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  staffSkills         StaffSkill[]
+  serviceRequirements ServiceSkillRequirement[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@map("queueless_skill")
+}
+
+model StaffSkill {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillId    String
+  skill      Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  assignedAt DateTime @default(now())
+  assignedBy String?
+
+  @@unique([userId, skillId])
+  @@index([userId])
+  @@index([skillId])
+}
+
+model ServiceSkillRequirement {
+  id         String   @id @default(uuid())
+  serviceId  String
+  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  skillId    String
+  skill      Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  isRequired Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@unique([serviceId, skillId])
+  @@index([serviceId])
+  @@index([skillId])
+}
+
+model Kiosk {
+  id               String       @id @default(uuid())
+  organizationId   String
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  branchId         String
+  branch           Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  name             String
+  deviceIdentifier String?      @unique
+  status           KioskStatus  @default(ACTIVE)
+  config           Json?
+  lastSeenAt       DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  queueEntries     QueueEntry[]
+
+  @@index([organizationId])
+  @@index([branchId, status])
+}
+
+model ServiceCounter {
+  id                  String        @id @default(uuid())
+  branchId            String
+  branch              Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  counterNumber       String        // e.g. "Counter 1", "Room 102"
+  name                String?       // e.g. "VIP Express Desk"
+  status              CounterStatus @default(AVAILABLE)
+  currentStaffId      String?
+  currentStaff        User?         @relation("CounterStaff", fields: [currentStaffId], references: [id], onDelete: SetNull)
+  currentServiceId    String?
+  currentService      Service?      @relation(fields: [currentServiceId], references: [id], onDelete: SetNull)
+  currentTicketNumber String?
+  currentEntryId      String?
+  isActive            Boolean       @default(true)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  @@unique([branchId, counterNumber])
+  @@index([branchId, isActive])
+  @@index([currentStaffId])
+}
+
+model LobbyDisplay {
+  id                   String           @id @default(uuid())
+  organizationId       String
+  organization         Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  branchId             String
+  branch               Branch           @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  name                 String           @default("Main Lobby TV")
+  mode                 LobbyDisplayMode @default(COMBINED)
+  voiceEnabled         Boolean          @default(true)
+  announcementTemplate String?          @default("Ticket {ticket}, please proceed to {counter}")
+  serviceIds           Json?
+  isActive             Boolean          @default(true)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  @@index([organizationId])
+  @@index([branchId, isActive])
+}
+
+model TicketSequence {
+  id           String   @id @default(uuid())
+  branchId     String
+  branch       Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  serviceId    String
+  service      Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  dateKey      String   // e.g. "2026-09-25"
+  lastSequence Int      @default(0)
+  prefix       String   @default("A")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([branchId, serviceId, dateKey])
+  @@index([branchId, dateKey])
+}
+
+

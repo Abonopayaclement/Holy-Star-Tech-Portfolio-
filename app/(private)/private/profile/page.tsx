@@ -92,7 +92,7 @@ export default function PrivateProfilePage() {
     twitter: "",
   });
 
-  const resumeFileInputRef = useRef<HTMLInputElement>(null);
+  const resumeFileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     async function loadAllData() {

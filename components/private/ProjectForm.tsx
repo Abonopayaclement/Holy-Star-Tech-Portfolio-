@@ -132,9 +132,9 @@ export function ProjectForm({ initialData }: ProjectFormProps) {
   );
   const [futureInput, setFutureInput] = useState("");
 
-  const featuredImageInputRef = useRef<HTMLInputElement>(null);
-  const screenshotInputRef = useRef<HTMLInputElement>(null);
-  const apkInputRef = useRef<HTMLInputElement>(null);
+  const featuredImageInputRef = useRef<HTMLInputElement | null>(null);
+  const screenshotInputRef = useRef<HTMLInputElement | null>(null);
+  const apkInputRef = useRef<HTMLInputElement | null>(null);
 
   // Auto-generate slug
   const handleTitleChange = (val: string) => {

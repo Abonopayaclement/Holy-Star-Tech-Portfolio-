@@ -17,6 +17,32 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  async rewrites() {
+    const isDev = process.env.NODE_ENV !== "production";
+    const defaultWebUrl = isDev ? "http://localhost:3001" : "https://queueless.vercel.app";
+    const rawUrl = (process.env.QUEUELLESS_WEB_URL || defaultWebUrl).replace(/\/$/, "");
+    const baseUrl = rawUrl.endsWith("/queueless") ? rawUrl.slice(0, -"/queueless".length) : rawUrl;
+
+    const rewritesList = [
+      {
+        source: "/queueless",
+        destination: `${baseUrl}/queueless`,
+      },
+      {
+        source: "/queueless/:path*",
+        destination: `${baseUrl}/queueless/:path*`,
+      },
+    ];
+
+    if (queuelessApiUrl) {
+      rewritesList.unshift({
+        source: "/queueless/api/:path*",
+        destination: `${queuelessApiUrl}/api/:path*`,
+      });
+    }
+
+    return rewritesList;
+  },
   async headers() {
     return [
       {

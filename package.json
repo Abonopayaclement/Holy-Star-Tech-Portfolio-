@@ -4,14 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && node scripts/auto-sync-db.js && next build",
     "postinstall": "prisma generate",
     "build:prod": "prisma generate && next build && node scripts/package-standalone.js",
     "package": "node scripts/package-standalone.js",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
-    "db:seed": "npx prisma db seed"
+    "db:seed": "npx prisma db seed",
+    "queueless:web": "npm start --prefix Queueless/apps/web",
+    "queueless:api": "npm run dev --prefix Queueless/apps/backend",
+    "queueless:db:setup": "node scripts/apply-queueless-db.js"
   },
   "prisma": {
     "seed": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
