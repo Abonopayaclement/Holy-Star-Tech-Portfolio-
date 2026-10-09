@@ -19,26 +19,30 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     const isDev = process.env.NODE_ENV !== "production";
-    const defaultWebUrl = isDev ? "http://localhost:3001" : "https://queueless.vercel.app";
-    const rawUrl = (process.env.QUEUELLESS_WEB_URL || defaultWebUrl).replace(/\/$/, "");
-    const baseUrl = rawUrl.endsWith("/queueless") ? rawUrl.slice(0, -"/queueless".length) : rawUrl;
-    const queuelessApiUrl = process.env.QUEUELLESS_API_URL ? process.env.QUEUELLESS_API_URL.replace(/\/$/, "") : null;
+    const targetWebUrl = process.env.QUEUELLESS_WEB_URL;
+    const queuelessApiUrl = process.env.QUEUELLESS_API_URL || (isDev ? "http://localhost:5000" : null);
 
-    const rewritesList = [
-      {
-        source: "/queueless",
-        destination: `${baseUrl}/queueless`,
-      },
-      {
-        source: "/queueless/:path*",
-        destination: `${baseUrl}/queueless/:path*`,
-      },
-    ];
+    const rewritesList: any[] = [];
+
+    if (targetWebUrl) {
+      const rawUrl = targetWebUrl.replace(/\/$/, "");
+      const baseUrl = rawUrl.endsWith("/queueless") ? rawUrl.slice(0, -"/queueless".length) : rawUrl;
+      rewritesList.push(
+        {
+          source: "/queueless/live",
+          destination: `${baseUrl}/queueless`,
+        },
+        {
+          source: "/queueless/live/:path*",
+          destination: `${baseUrl}/queueless/:path*`,
+        }
+      );
+    }
 
     if (queuelessApiUrl) {
       rewritesList.unshift({
         source: "/queueless/api/:path*",
-        destination: `${queuelessApiUrl}/api/:path*`,
+        destination: `${queuelessApiUrl.replace(/\/$/, "")}/api/:path*`,
       });
     }
 
