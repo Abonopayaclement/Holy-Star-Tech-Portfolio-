@@ -19,32 +19,28 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     const isDev = process.env.NODE_ENV !== "production";
-    const targetWebUrl = process.env.QUEUELLESS_WEB_URL;
     const queuelessApiUrl = process.env.QUEUELLESS_API_URL || (isDev ? "http://localhost:5000" : null);
 
     const rewritesList: any[] = [];
 
-    if (targetWebUrl) {
-      const rawUrl = targetWebUrl.replace(/\/$/, "");
-      const baseUrl = rawUrl.endsWith("/queueless") ? rawUrl.slice(0, -"/queueless".length) : rawUrl;
-      rewritesList.push(
-        {
-          source: "/queueless/live",
-          destination: `${baseUrl}/queueless`,
-        },
-        {
-          source: "/queueless/live/:path*",
-          destination: `${baseUrl}/queueless/:path*`,
-        }
-      );
-    }
-
     if (queuelessApiUrl) {
-      rewritesList.unshift({
+      rewritesList.push({
         source: "/queueless/api/:path*",
         destination: `${queuelessApiUrl.replace(/\/$/, "")}/api/:path*`,
       });
     }
+
+    // Rewrite all QueueLess SPA routes to the compiled React index.html
+    rewritesList.push(
+      {
+        source: "/queueless",
+        destination: "/queueless/index.html",
+      },
+      {
+        source: "/queueless/:path((?!static|favicon|logo|manifest|robots|api).*)",
+        destination: "/queueless/index.html",
+      }
+    );
 
     return rewritesList;
   },

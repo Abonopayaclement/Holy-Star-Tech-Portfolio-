@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/queueless/static/css/main.3091dbd8.css",
+    "main.js": "/queueless/static/js/main.15f05927.js",
+    "index.html": "/queueless/index.html",
+    "main.3091dbd8.css.map": "/queueless/static/css/main.3091dbd8.css.map",
+    "main.15f05927.js.map": "/queueless/static/js/main.15f05927.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.3091dbd8.css",
+    "static/js/main.15f05927.js"
+  ]
+}
