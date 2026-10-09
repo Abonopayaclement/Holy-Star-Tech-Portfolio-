@@ -35,6 +35,7 @@ yarn-error.log*
 
 # database backups & archives
 /backups/
+!backups/queueless_local_full_export.json
 *.sql
 *.zip
 tmp/
