@@ -127,8 +127,6 @@ export async function GET(
 
     // 3. Super Admin Executive Console Analytics (/analytics/executive)
     if (path === "analytics/executive") {
-      const period = searchParams.get("period") || "last_7_days";
-
       // 1. Platform-wide KPI Counts from database
       const [orgsCount]: any = await prisma.$queryRawUnsafe("SELECT COUNT(*) as count FROM `Organization`");
       const [pendingOrgsCount]: any = await prisma.$queryRawUnsafe("SELECT COUNT(*) as count FROM `Organization` WHERE status = 'PENDING_APPROVAL'");
@@ -322,11 +320,10 @@ export async function GET(
       const appts: any = await prisma.$queryRawUnsafe(`
         SELECT 
           a.id,
-          a.scheduledTime,
           a.status,
-          a.problemType,
-          a.fee,
           a.notes,
+          COALESCE(a.scheduledTime, a.startTime, a.createdAt) as scheduledTime,
+          COALESCE(a.startTime, a.scheduledTime, a.createdAt) as startTime,
           u.fullName as customerName,
           u.email as customerEmail,
           u.phoneNumber as customerPhone,
@@ -334,11 +331,11 @@ export async function GET(
           b.name as branchName,
           o.name as organizationName
         FROM \`Appointment\` a
-        LEFT JOIN \`queueless_user\` u ON a.userId = u.id
+        LEFT JOIN \`queueless_user\` u ON (a.userId = u.id OR a.customerId = u.id)
         LEFT JOIN \`Service\` s ON a.serviceId = s.id
         LEFT JOIN \`Branch\` b ON a.branchId = b.id
-        LEFT JOIN \`Organization\` o ON b.organizationId = o.id
-        ORDER BY a.scheduledTime DESC
+        LEFT JOIN \`Organization\` o ON (b.organizationId = o.id OR a.organizationId = o.id)
+        ORDER BY a.createdAt DESC
       `);
       return json(appts || []);
     }
@@ -597,13 +594,20 @@ export async function GET(
       const userId = authUser?.id || "cust-01";
 
       const appts: any = await prisma.$queryRawUnsafe(`
-        SELECT a.id, a.scheduledTime, a.status, a.problemType, a.fee, a.notes, s.name as serviceName, b.name as branchName 
+        SELECT 
+          a.id, 
+          a.status, 
+          a.notes, 
+          COALESCE(a.scheduledTime, a.startTime, a.createdAt) as scheduledTime,
+          COALESCE(a.startTime, a.scheduledTime, a.createdAt) as startTime,
+          s.name as serviceName, 
+          b.name as branchName 
         FROM \`Appointment\` a 
         LEFT JOIN \`Service\` s ON a.serviceId = s.id 
         LEFT JOIN \`Branch\` b ON a.branchId = b.id 
-        WHERE a.userId = ? 
-        ORDER BY a.scheduledTime DESC LIMIT 50
-      `, userId);
+        WHERE (a.userId = ? OR a.customerId = ?)
+        ORDER BY a.createdAt DESC LIMIT 50
+      `, userId, userId);
       return json(appts || []);
     }
 
@@ -890,18 +894,21 @@ export async function POST(
     // 11. Book Appointment (/appointments)
     if (path === "appointments") {
       const authUser = getAuthUser(request);
-      const { branchId, serviceId, scheduledTime, notes, problemType } = body;
+      const { branchId, serviceId, scheduledTime, startTime, notes, problemType } = body;
       const apptId = `apt-${Date.now()}`;
-      const userId = authUser?.id || body.userId || "cust-01";
+      const userId = authUser?.id || body.userId || body.customerId || "cust-01";
+      const targetTime = scheduledTime ? new Date(scheduledTime) : (startTime ? new Date(startTime) : new Date());
 
       await prisma.$executeRawUnsafe(
-        `INSERT INTO \`Appointment\` (\`id\`, \`userId\`, \`branchId\`, \`serviceId\`, \`scheduledTime\`, \`status\`, \`notes\`, \`problemType\`)
-         VALUES (?, ?, ?, ?, ?, 'CONFIRMED', ?, ?)`,
+        `INSERT INTO \`Appointment\` (\`id\`, \`userId\`, \`customerId\`, \`branchId\`, \`serviceId\`, \`scheduledTime\`, \`startTime\`, \`status\`, \`notes\`, \`problemType\`)
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'CONFIRMED', ?, ?)`,
         apptId,
+        userId,
         userId,
         branchId,
         serviceId,
-        scheduledTime ? new Date(scheduledTime) : new Date(),
+        targetTime,
+        targetTime,
         notes || null,
         problemType || null
       );

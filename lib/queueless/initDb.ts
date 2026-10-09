@@ -135,13 +135,17 @@ export async function ensureQueueLessTables(): Promise<{ success: boolean; messa
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS \`Appointment\` (
         \`id\` VARCHAR(191) NOT NULL PRIMARY KEY,
-        \`customerId\` VARCHAR(191) NOT NULL,
+        \`customerId\` VARCHAR(191) NULL,
+        \`userId\` VARCHAR(191) NULL,
         \`branchId\` VARCHAR(191) NOT NULL,
         \`serviceId\` VARCHAR(191) NOT NULL,
         \`organizationId\` VARCHAR(191) NULL,
         \`startTime\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        \`scheduledTime\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
         \`endTime\` DATETIME(3) NULL,
         \`status\` VARCHAR(50) NOT NULL DEFAULT 'CONFIRMED',
+        \`problemType\` VARCHAR(191) NULL,
+        \`fee\` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
         \`notes\` TEXT NULL,
         \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
         \`updatedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
