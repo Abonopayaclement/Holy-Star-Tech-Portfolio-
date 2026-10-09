@@ -106,13 +106,15 @@ const Login: React.FC = () => {
     }
   };
 
-  const quickFill = (testEmail: string, testPass: string) => {
-    setEmail(testEmail);
-    setPassword(testPass);
-    setAuthMode('LOGIN');
-    setError('');
-    setOrgRegistrationSuccess(null);
-  };
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get('mode');
+    if (mode === 'customer' || mode === 'register') {
+      setAuthMode('CUSTOMER_REGISTER');
+    } else if (mode === 'org' || mode === 'organization') {
+      setAuthMode('ORG_REGISTER');
+    }
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-gray-100">
@@ -474,102 +476,6 @@ const Login: React.FC = () => {
               </button>
             </form>
           )}
-
-          {/* Quick Demo Logins for Fast Role Testing */}
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 text-center mb-3">
-              One-Click Test Accounts
-            </p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              {/* Super Admin Quick Button */}
-              <button
-                type="button"
-                onClick={() => quickFill('admin@queueless.com', 'admin123')}
-                className="col-span-2 p-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-300 hover:border-blue-600 rounded-xl text-left transition-all shadow-xs"
-                title="Super Admin - Platform Executive Console"
-              >
-                <div className="font-black text-blue-900 flex items-center justify-between">
-                  <span className="flex items-center">
-                    <ShieldCheck className="w-4 h-4 mr-1.5 text-blue-600" /> Super Admin (Platform Oversight)
-                  </span>
-                  <span className="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded-full font-bold">EXECUTIVE</span>
-                </div>
-                <div className="text-[11px] text-blue-700 font-mono mt-0.5">admin@queueless.com / admin123</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => quickFill('owner@queueless.com', 'password123')}
-                className="p-2 border border-gray-200 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-left transition-all"
-                title="Apex Bank Ghana Admin"
-              >
-                <div className="font-bold text-gray-800 flex items-center">
-                  <Building2 className="w-3 h-3 mr-1 text-indigo-600" /> Apex Bank Admin
-                </div>
-                <div className="text-[10px] text-gray-400">owner@queueless.com</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => quickFill('clinic.admin@queueless.com', 'password123')}
-                className="p-2 border border-gray-200 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-left transition-all"
-                title="St. Jude Clinic Admin"
-              >
-                <div className="font-bold text-gray-800 flex items-center">
-                  <Building2 className="w-3 h-3 mr-1 text-emerald-600" /> Clinic Admin
-                </div>
-                <div className="text-[10px] text-gray-400">clinic.admin@queueless.com</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => quickFill('gov.admin@queueless.com', 'password123')}
-                className="p-2 border border-gray-200 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-left transition-all"
-                title="DVLA Licensing Admin"
-              >
-                <div className="font-bold text-gray-800 flex items-center">
-                  <Building2 className="w-3 h-3 mr-1 text-amber-600" /> DVLA Admin
-                </div>
-                <div className="text-[10px] text-gray-400">gov.admin@queueless.com</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => quickFill('manager@queueless.com', 'password123')}
-                className="p-2 border border-gray-200 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-left transition-all"
-                title="Branch Manager"
-              >
-                <div className="font-bold text-gray-800 flex items-center">
-                  <Building2 className="w-3 h-3 mr-1 text-purple-600" /> Branch Manager
-                </div>
-                <div className="text-[10px] text-gray-400">manager@queueless.com</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => quickFill('staff@queueless.com', 'password123')}
-                className="p-2 border border-gray-200 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-left transition-all"
-                title="Staff User"
-              >
-                <div className="font-bold text-gray-800 flex items-center">
-                  <User className="w-3 h-3 mr-1 text-teal-600" /> Branch Staff
-                </div>
-                <div className="text-[10px] text-gray-400">staff@queueless.com</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => quickFill('customer@queueless.com', 'password123')}
-                className="p-2 border border-gray-200 hover:border-blue-500 hover:bg-blue-50/50 rounded-xl text-left transition-all"
-                title="Customer (Abena Osei)"
-              >
-                <div className="font-bold text-gray-800 flex items-center">
-                  <User className="w-3 h-3 mr-1 text-blue-600" /> Customer (Abena)
-                </div>
-                <div className="text-[10px] text-gray-400">customer@queueless.com</div>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

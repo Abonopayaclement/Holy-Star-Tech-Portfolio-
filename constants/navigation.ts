@@ -9,6 +9,7 @@ export const mainNav: NavItem[] = [
   { title: "Home", href: "/" },
   { title: "About", href: "/about" },
   { title: "Projects", href: "/projects" },
+  { title: "QueueLess", href: "/queueless" },
   { title: "Blog", href: "/blog" },
   { title: "Resume", href: "/resume" },
   { title: "Contact", href: "/contact" },
@@ -18,6 +19,7 @@ export const footerNav = {
   platform: [
     { title: "About", href: "/about" },
     { title: "Projects", href: "/projects" },
+    { title: "QueueLess", href: "/queueless" },
     { title: "Blog", href: "/blog" },
   ],
   explore: [

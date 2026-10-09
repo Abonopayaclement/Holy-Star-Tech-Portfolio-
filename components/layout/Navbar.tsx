@@ -40,6 +40,26 @@ export function Navbar() {
         <nav className="hidden items-center gap-1 md:flex">
           {mainNav.map((item) => {
             const isActive = pathname === item.href;
+            if (item.title === "QueueLess") {
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "relative ml-1 mr-1 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold tracking-wide transition-all shadow-sm",
+                    isActive
+                      ? "bg-indigo-600 text-white shadow-indigo-500/25 ring-2 ring-indigo-400"
+                      : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-95 hover:shadow-md hover:scale-105"
+                  )}
+                >
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+                  </span>
+                  QueueLess
+                </Link>
+              );
+            }
             return (
               <Link
                 key={item.href}
@@ -100,21 +120,39 @@ export function Navbar() {
             className="overflow-hidden border-b border-border/40 bg-background/95 backdrop-blur-lg md:hidden"
           >
             <div className="flex flex-col gap-2 px-6 py-4">
-              {mainNav.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className={cn(
-                    "rounded-md py-2.5 text-base font-medium transition-colors",
-                    pathname === item.href
-                      ? "text-indigo-500 font-semibold"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {item.title}
-                </Link>
-              ))}
+              {mainNav.map((item) => {
+                if (item.title === "QueueLess") {
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className="my-1 flex items-center justify-between rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        QueueLess Platform
+                      </span>
+                      <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-mono uppercase">Live</span>
+                    </Link>
+                  );
+                }
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className={cn(
+                      "rounded-md py-2.5 text-base font-medium transition-colors",
+                      pathname === item.href
+                        ? "text-indigo-500 font-semibold"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {item.title}
+                  </Link>
+                );
+              })}
               <div className="mt-2 border-t border-border/40 pt-4">
                 <Link
                   href="/contact"

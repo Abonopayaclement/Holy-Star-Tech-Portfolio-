@@ -156,7 +156,26 @@ export async function ensureQueueLessTables(): Promise<{ success: boolean; messa
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
 
-    // 10. Seed Full Organizations (Active + Pending for Super Admin testing)
+    // 10. QRCode table
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS \`QRCode\` (
+        \`id\` VARCHAR(191) NOT NULL PRIMARY KEY,
+        \`organizationId\` VARCHAR(191) NOT NULL,
+        \`branchId\` VARCHAR(191) NOT NULL,
+        \`serviceId\` VARCHAR(191) NOT NULL,
+        \`token\` VARCHAR(191) NOT NULL UNIQUE,
+        \`type\` VARCHAR(50) NOT NULL DEFAULT 'SERVICE',
+        \`status\` VARCHAR(50) NOT NULL DEFAULT 'ACTIVE',
+        \`expiresAt\` DATETIME(3) NULL,
+        \`revokedAt\` DATETIME(3) NULL,
+        \`createdBy\` VARCHAR(191) NULL,
+        \`revokedBy\` VARCHAR(191) NULL,
+        \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        \`updatedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+
+    // 11. Seed Full Organizations (Active + Pending for Super Admin testing)
     await prisma.$executeRawUnsafe(`
       INSERT INTO \`Organization\` (\`id\`, \`name\`, \`type\`, \`description\`, \`status\`, \`contactEmail\`, \`contactPhone\`, \`address\`)
       VALUES 
@@ -424,6 +443,32 @@ export async function ensureQueueLessTables(): Promise<{ success: boolean; messa
             } catch (e) {}
           }
         }
+      }
+
+      // Ensure default QR codes exist for active services
+      try {
+        const [qrCount]: any = await prisma.$queryRawUnsafe("SELECT COUNT(*) as count FROM `QRCode`");
+        if (!qrCount || Number(qrCount.count) === 0) {
+          const services: any = await prisma.$queryRawUnsafe(`
+            SELECT s.id as serviceId, s.name as serviceName, s.branchId, b.name as branchName, b.organizationId
+            FROM \`Service\` s
+            JOIN \`Branch\` b ON s.branchId = b.id
+            WHERE s.isActive = 1
+          `);
+          for (const s of (services || [])) {
+            const bPrefix = (s.branchName || "QL").replace(/[^a-zA-Z0-9]/g, "").slice(0, 4).toUpperCase();
+            const sPrefix = (s.serviceName || "SVC").replace(/[^a-zA-Z0-9]/g, "").slice(0, 3).toUpperCase();
+            const token = `QR-${bPrefix}-${sPrefix}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+            const qrId = `qr-${s.serviceId}`;
+            await prisma.$executeRawUnsafe(`
+              INSERT INTO \`QRCode\` (\`id\`, \`organizationId\`, \`branchId\`, \`serviceId\`, \`token\`, \`type\`, \`status\`, \`createdBy\`, \`createdAt\`)
+              VALUES (?, ?, ?, ?, ?, 'SERVICE', 'ACTIVE', 'System Provisioning', CURRENT_TIMESTAMP(3))
+              ON DUPLICATE KEY UPDATE \`status\` = 'ACTIVE';
+            `, qrId, s.organizationId, s.branchId, s.serviceId, token);
+          }
+        }
+      } catch (qrInitErr) {
+        console.warn("Notice initializing QRCodes:", qrInitErr);
       }
     } catch (importErr) {
       console.warn("Notice importing fullData in initDb:", importErr);

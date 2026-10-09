@@ -51,3 +51,9 @@ tmp/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local credentials & secret docs (PC-only, never committed to GitHub)
+*.local.md
+QUEUELLESS_CREDENTIALS.local.md
+Queueless/QUEUELLESS_CREDENTIALS.local.md
+

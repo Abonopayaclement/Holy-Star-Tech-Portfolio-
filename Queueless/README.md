@@ -16,78 +16,11 @@ QueueLess is a production-grade, multi-tenant queue management and appointment b
 
 ---
 
-## 🔑 All Platform Logins & Credentials
-
-> [!IMPORTANT]
-> **Default Password**: Unless noted otherwise, the password for **all** Organization Admins, Branch Managers, Counter Staff, and Customers is:
-> `password123`
-
-### 1. Global Platform Super Admin
-
-| Email | Password | Role | Description |
-| :--- | :--- | :--- | :--- |
-| `admin@queueless.com` | `admin123` | `SUPER_ADMIN` | Global platform administration, tenant provisioning, system audit |
-
----
-
-### 2. Multi-Tenant Organizations & Staff Accounts
-
-#### 🏦 1. Apex Bank Ghana (Banking & Financial Services)
-*Retail & Commercial Banking with branches in Airport City & Osu.*
-
-| Email | Password | Role | Branch / Title | Description / Focus |
-| :--- | :--- | :--- | :--- | :--- |
-| `owner@queueless.com` | `password123` | `ORG_ADMIN` | Apex Bank HQ | Managing Director / Apex Organization Admin |
-| `manager@queueless.com` | `password123` | `BRANCH_MANAGER` | Airport City Branch | Branch Manager (One Airport Square) |
-| `staff@queueless.com` | `password123` | `STAFF` | Airport City Branch | Senior Cash & Teller Staff |
-| `osu.manager@queueless.com` | `password123` | `BRANCH_MANAGER` | Osu Oxford St Branch | Branch Manager (Oxford Street) |
-| `osu.staff@queueless.com` | `password123` | `STAFF` | Osu Oxford St Branch | Customer Service & Card Desk |
-
----
-
-#### 🏥 2. St. Jude Specialist Hospital & Diagnostic Center (Healthcare)
-*Outpatient clinic, specialist consultations, well-baby clinic, and diagnostic lab.*
-
-| Email | Password | Role | Branch / Title | Description / Focus |
-| :--- | :--- | :--- | :--- | :--- |
-| `clinic.admin@queueless.com` | `password123` | `ORG_ADMIN` | St. Jude HQ | Medical Director / Clinic Org Admin |
-| `clinic.manager@queueless.com` | `password123` | `BRANCH_MANAGER` | Ridge Medical Pavilion | Head of Clinic (Castle Road, Ridge) |
-| `clinic.staff@queueless.com` | `password123` | `STAFF` | Ridge Medical Pavilion | Triage Desk & OPD Nurse |
-| `legon.manager@queueless.com` | `password123` | `BRANCH_MANAGER` | East Legon Polyclinic | Polyclinic Lead (Lagos Avenue) |
-| `pharmacy.staff@queueless.com` | `password123` | `STAFF` | East Legon Polyclinic | Chief Dispenser & Diagnostic Intake |
-
----
-
-#### 🚗 3. Driver & Vehicle Licensing Authority (DVLA) (Civic & Government)
-*National vehicle roadworthiness inspection, driver licensing, and haulage permits.*
-
-| Email | Password | Role | Branch / Title | Description / Focus |
-| :--- | :--- | :--- | :--- | :--- |
-| `gov.admin@queueless.com` | `password123` | `ORG_ADMIN` | DVLA National HQ | Director General / Government Org Admin |
-| `gov.manager@queueless.com` | `password123` | `BRANCH_MANAGER` | 37 Liberation Rd Center | Regional Supervisor (37 Military Area) |
-| `gov.staff@queueless.com` | `password123` | `STAFF` | 37 Liberation Rd Center | Driver Licensing Officer |
-| `tema.manager@queueless.com` | `password123` | `BRANCH_MANAGER` | Tema Industrial Center | Harbour Station Lead (Community 1) |
-| `tema.staff@queueless.com` | `password123` | `STAFF` | Tema Industrial Center | Vehicle Roadworthiness & Truck Inspector |
-
----
-
-### 3. Customer Test Accounts (Clean Slates for Verification)
+## 🔑 Platform Authentication & Security
 
 > [!NOTE]
-> **Testing Policy (Item 24 & 25)**: All 10 customer accounts have been seeded with **0 active tickets and 0 pre-joined queues (Clean Slate)**. This ensures that live queue joining, QR scanning, ticket progression, and appointment booking can be tested cleanly without interference from automated test entries.
-
-| Email | Full Name | Location | Phone Number | Password | Account Status |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **`customer@queueless.com`** | Abena Osei | Accra, Greater Accra | `+233 24 100 0001` | `password123` | Active Customer (Clean Queue) |
-| **`customer1@queueless.com`** | Kwame Mensah | Kumasi, Ashanti | `+233 20 100 0002` | `password123` | Active Customer (Clean Queue) |
-| **`customer2@queueless.com`** | Fatima Al-Hassan | Tamale, Northern | `+233 26 100 0003` | `password123` | Active Customer (Clean Queue) |
-| **`customer3@queueless.com`** | David Tetteh | Tema, Greater Accra | `+233 54 100 0004` | `password123` | Active Customer (Clean Queue) |
-| **`customer4@queueless.com`** | Esi Annan | Takoradi, Western | `+233 50 100 0005` | `password123` | Active Customer (Clean Queue) |
-| **`customer5@queueless.com`** | Emmanuel Sowah | Cape Coast, Central | `+233 27 100 0006` | `password123` | Active Customer (Clean Queue) |
-| **`customer6@queueless.com`** | Akosua Agyemang | Sunyani, Bono | `+233 28 100 0007` | `password123` | Active Customer (Clean Queue) |
-| **`customer7@queueless.com`** | Kofi Boateng | Koforidua, Eastern | `+233 55 100 0008` | `password123` | Active Customer (Clean Queue) |
-| **`customer8@queueless.com`** | Zainab Musah | Ho, Volta | `+233 59 100 0009` | `password123` | Active Customer (Clean Queue) |
-| **`customer9@queueless.com`** | Yaw Ofori | Bolgatanga, Upper East | `+233 23 100 0010` | `password123` | Active Customer (Clean Queue) |
+> **Confidential Credentials**: Test accounts and administrative credentials are kept in your local environment file (`QUEUELLESS_CREDENTIALS.local.md`) on your workstation and are never published to GitHub.
+> Refer to your local `QUEUELLESS_CREDENTIALS.local.md` file for full administrative matrices and tenant logins.
 
 ---
 
@@ -135,15 +68,15 @@ Accessible to Branch Managers and Organization Admins:
 
 ## 🖥️ Feature Tour & Testing Guide
 
-### 1. Clean Testing with the 10 Seeded Customer Accounts
-1. Open the mobile app or web portal and sign in with `customer@queueless.com` / `password123`.
+### 1. Clean Testing with Seeded Customer Accounts
+1. Open the mobile app or web portal and sign in with a seeded customer account from your local `QUEUELLESS_CREDENTIALS.local.md`.
 2. Observe 0 pre-joined tickets in the clean queue dashboard.
 3. Test Flow A (QR Scan): Scan any service standee token from `/qr-management`. Observe instant navigation directly into that service with `[ SCANNED VIA SERVICE QR CODE ]`.
 4. Click **Join Live Queue** $\rightarrow$ receive sequential ticket number (e.g., `T-001`).
-5. In another window, log in as counter staff (`staff@queueless.com` / `password123`) $\rightarrow$ see the ticket appear in real time $\rightarrow$ click **Call Next** $\rightarrow$ hear the Web Audio chime.
+5. In another window, log in as counter staff $\rightarrow$ see the ticket appear in real time $\rightarrow$ click **Call Next** $\rightarrow$ hear the Web Audio chime.
 
 ### 2. QR Code Revocation & Error Handling
-1. Log in to the Web Portal as `manager@queueless.com` / `password123` and navigate to **QR Management** (`/qr-management`).
+1. Log in to the Web Portal as a Branch Manager and navigate to **QR Management** (`/qr-management`).
 2. Locate the active QR standee for *Teller Services* and click **Revoke**.
 3. Re-scan the revoked QR token on the mobile app or scanner:
    - Notice the friendly prompt: **"QR Code Revoked: This QR code has been closed by the organization."**
@@ -156,7 +89,7 @@ Accessible to Branch Managers and Organization Admins:
 3. High-contrast fullscreen view displays the active ticket number, counter service name, upcoming queue list, and automatic audio chime when tickets are called.
 
 ### 4. Dynamic Appointment Booking & Rescheduling
-1. Log in as customer `customer5@queueless.com` (`password123`).
+1. Log in as a customer account.
 2. Go to **`Join Queue / Book Visit`**.
 3. Select an organization (e.g. *St. Jude Specialist Hospital*), a branch, and a service.
 4. Choose **`Schedule Fixed Appointment`**.

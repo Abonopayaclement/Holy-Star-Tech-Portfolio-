@@ -17,6 +17,7 @@ import Analytics from './pages/Analytics';
 import Organizations from './pages/Organizations';
 import QueuesOversight from './pages/QueuesOversight';
 import PlatformStaff from './pages/PlatformStaff';
+import Landing from './pages/Landing';
 import Layout from './components/Layout';
 import './App.css';
 
@@ -52,23 +53,22 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
 
 const queryClient = new QueryClient();
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const RootRoute: React.FC = () => {
   const { user, loading } = useAuth();
-  
   if (loading) {
     return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f3f4f6' }}>
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#020617' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ width: '40px', height: '40px', border: '4px solid #3b82f6', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto' }}></div>
-          <p style={{ marginTop: '16px', color: '#4b5563' }}>Loading Protected Route...</p>
+          <p style={{ marginTop: '16px', color: '#94a3b8' }}>Loading QueueLess...</p>
         </div>
       </div>
     );
   }
-  
-  if (!user) return <Navigate to="/login" />;
-  
-  return <>{children}</>;
+  if (!user) {
+    return <Landing />;
+  }
+  return <Layout />;
 };
 
 function App() {
@@ -79,6 +79,8 @@ function App() {
           <ActiveBranchProvider>
             <BrowserRouter basename={process.env.PUBLIC_URL || ''}>
               <Routes>
+                <Route path="/landing" element={<Landing />} />
+                <Route path="/showcase" element={<Landing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/join/:token" element={<JoinRedirect />} />
                 <Route path="/join" element={<JoinRedirect />} />
@@ -89,14 +91,7 @@ function App() {
                 <Route path="/kiosk" element={<Kiosk />} />
                 <Route path="/kiosk/:branchId" element={<Kiosk />} />
                 <Route path="/customer-portal" element={<CustomerPortal />} />
-                <Route 
-                  path="/" 
-                  element={
-                    <ProtectedRoute>
-                      <Layout />
-                    </ProtectedRoute>
-                  }
-                >
+                <Route path="/" element={<RootRoute />}>
                   <Route index element={<Dashboard />} />
                   <Route path="organizations" element={<Organizations />} />
                   <Route path="queues" element={<QueuesOversight />} />
