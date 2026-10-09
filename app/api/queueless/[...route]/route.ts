@@ -322,8 +322,8 @@ export async function GET(
           a.id,
           a.status,
           a.notes,
-          COALESCE(a.scheduledTime, a.startTime, a.createdAt) as scheduledTime,
-          COALESCE(a.startTime, a.scheduledTime, a.createdAt) as startTime,
+          a.startTime,
+          a.startTime as scheduledTime,
           u.fullName as customerName,
           u.email as customerEmail,
           u.phoneNumber as customerPhone,
@@ -331,13 +331,13 @@ export async function GET(
           b.name as branchName,
           o.name as organizationName
         FROM \`Appointment\` a
-        LEFT JOIN \`queueless_user\` u ON (a.userId = u.id OR a.customerId = u.id)
+        LEFT JOIN \`queueless_user\` u ON a.customerId = u.id
         LEFT JOIN \`Service\` s ON a.serviceId = s.id
         LEFT JOIN \`Branch\` b ON a.branchId = b.id
         LEFT JOIN \`Organization\` o ON (b.organizationId = o.id OR a.organizationId = o.id)
         ORDER BY a.createdAt DESC
       `);
-      return json(appts || []);
+      return json((appts || []).map((a: any) => ({ ...a, scheduledTime: a.startTime })));
     }
 
     // 7. Organizations: List (/organizations)
@@ -598,17 +598,17 @@ export async function GET(
           a.id, 
           a.status, 
           a.notes, 
-          COALESCE(a.scheduledTime, a.startTime, a.createdAt) as scheduledTime,
-          COALESCE(a.startTime, a.scheduledTime, a.createdAt) as startTime,
+          a.startTime,
+          a.startTime as scheduledTime,
           s.name as serviceName, 
           b.name as branchName 
         FROM \`Appointment\` a 
         LEFT JOIN \`Service\` s ON a.serviceId = s.id 
         LEFT JOIN \`Branch\` b ON a.branchId = b.id 
-        WHERE (a.userId = ? OR a.customerId = ?)
+        WHERE a.customerId = ?
         ORDER BY a.createdAt DESC LIMIT 50
-      `, userId, userId);
-      return json(appts || []);
+      `, userId);
+      return json((appts || []).map((a: any) => ({ ...a, scheduledTime: a.startTime })));
     }
 
     // 20. Analytics Overview (/analytics or /analytics/dashboard)
@@ -900,17 +900,14 @@ export async function POST(
       const targetTime = scheduledTime ? new Date(scheduledTime) : (startTime ? new Date(startTime) : new Date());
 
       await prisma.$executeRawUnsafe(
-        `INSERT INTO \`Appointment\` (\`id\`, \`userId\`, \`customerId\`, \`branchId\`, \`serviceId\`, \`scheduledTime\`, \`startTime\`, \`status\`, \`notes\`, \`problemType\`)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 'CONFIRMED', ?, ?)`,
+        `INSERT INTO \`Appointment\` (\`id\`, \`customerId\`, \`branchId\`, \`serviceId\`, \`startTime\`, \`status\`, \`notes\`)
+         VALUES (?, ?, ?, ?, ?, 'CONFIRMED', ?)`,
         apptId,
-        userId,
         userId,
         branchId,
         serviceId,
         targetTime,
-        targetTime,
-        notes || null,
-        problemType || null
+        notes || null
       );
 
       return json({ message: "Appointment booked successfully.", appointmentId: apptId });
