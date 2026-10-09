@@ -172,6 +172,10 @@ async function autoSync() {
       }
     }
 
+    try {
+      await prisma.$executeRawUnsafe("ALTER TABLE `Queue` ADD COLUMN `closedReason` TEXT NULL;");
+    } catch (e) {}
+
     // Load full exported data if available
     let backupPath = path.join(__dirname, '..', 'lib', 'queueless', 'data', 'queueless_seed.json');
     if (!fs.existsSync(backupPath)) {

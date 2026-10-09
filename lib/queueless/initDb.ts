@@ -82,6 +82,10 @@ export async function ensureQueueLessTables(): Promise<{ success: boolean; messa
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
 
+    try {
+      await prisma.$executeRawUnsafe(`ALTER TABLE \`Queue\` ADD COLUMN \`closedReason\` TEXT NULL;`);
+    } catch (e) {}
+
     // 6. queueless_ticket table
     await prisma.$executeRawUnsafe(`
       CREATE TABLE IF NOT EXISTS \`queueless_ticket\` (

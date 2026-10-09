@@ -351,12 +351,12 @@ export async function GET(
               const servicesWithQueues = await Promise.all(
                 (services || []).map(async (s: any) => {
                   const queues: any = await prisma.$queryRawUnsafe(
-                    "SELECT id, status, closedReason FROM `Queue` WHERE serviceId = ?",
+                    "SELECT id, status FROM `Queue` WHERE serviceId = ?",
                     s.id
                   );
                   return {
                     ...s,
-                    queues: queues || [],
+                    queues: (queues || []).map((q: any) => ({ ...q, closedReason: null })),
                   };
                 })
               );
@@ -515,7 +515,7 @@ export async function GET(
 
       // Fetch all branch queues with waiting counts and service objects
       const queues: any = await prisma.$queryRawUnsafe(`
-        SELECT q.id, q.branchId, q.serviceId, q.status, q.closedReason, s.name as serviceName, s.description, s.duration, s.price
+        SELECT q.id, q.branchId, q.serviceId, q.status, s.name as serviceName, s.description, s.duration, s.price
         FROM \`Queue\` q
         JOIN \`Service\` s ON q.serviceId = s.id
         WHERE q.branchId = ?
@@ -532,7 +532,7 @@ export async function GET(
           branchId: q.branchId,
           serviceId: q.serviceId,
           status: q.status,
-          closedReason: q.closedReason,
+          closedReason: (q as any).closedReason || null,
           service: { id: q.serviceId, name: q.serviceName, description: q.description, duration: q.duration, price: q.price },
           _count: { entries: waitingCount },
           entries: [],
@@ -573,7 +573,7 @@ export async function GET(
       }
 
       const queues: any = await prisma.$queryRawUnsafe(`
-        SELECT q.id, q.branchId, q.serviceId, q.status, q.closedReason, s.name as serviceName, s.description as serviceDescription, s.duration, s.price 
+        SELECT q.id, q.branchId, q.serviceId, q.status, s.name as serviceName, s.description as serviceDescription, s.duration, s.price 
         FROM \`Queue\` q 
         JOIN \`Service\` s ON q.serviceId = s.id 
         WHERE q.branchId = ?
@@ -585,6 +585,7 @@ export async function GET(
           const serving: any = await prisma.$queryRawUnsafe("SELECT ticketNumber, counterNumber FROM `queueless_ticket` WHERE queueId = ? AND status = 'SERVING' LIMIT 1", q.id);
           return {
             ...q,
+            closedReason: (q as any).closedReason || null,
             service: { id: q.serviceId, name: q.serviceName, description: q.serviceDescription, duration: q.duration, price: q.price },
             waitingCount: counts?.[0]?.waitingCount ? Number(counts[0].waitingCount) : 0,
             currentlyServing: serving?.[0] || null,
