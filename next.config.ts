@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
     const defaultWebUrl = isDev ? "http://localhost:3001" : "https://queueless.vercel.app";
     const rawUrl = (process.env.QUEUELLESS_WEB_URL || defaultWebUrl).replace(/\/$/, "");
     const baseUrl = rawUrl.endsWith("/queueless") ? rawUrl.slice(0, -"/queueless".length) : rawUrl;
+    const queuelessApiUrl = process.env.QUEUELLESS_API_URL ? process.env.QUEUELLESS_API_URL.replace(/\/$/, "") : null;
 
     const rewritesList = [
       {
